@@ -67,6 +67,79 @@
 ---
 
 # 시간 복잡도와 공간복잡도 [☝](#알고리즘)
+좋은 알고리즘, 효율적인 알고리즘이란 적은 시간안에 적은 자원을 소비해서 답을 도출하는 알고리즘을 말합니다. 알고리즘의 속도와 자원 사용량을 나타내는 지표를 각각 시간 복잡도와 공간 복잡도라고 합니다.
+
+## 시간복잡도(Time Complexity)
+
+시간 복잡도는 서로 다른 알고리즘의 효율성을 비교할 때 사용합니다. 시간 복잡도(Time Complexity)는 알고리즘의 절대적인 실행 시간을 나타내는 것이 아닌 알고리즘을 수행하는 데 연산들이 몇 번 이루어지는 지를 숫자로 표기합니다. 그런데 연산(Operation)의 실행 횟수는 보편적으로 그 값이 변하지 않는 상수(Constant)가 아니라 입력한 데이터의 개수를 나타내는 n에 따라 변하게 됩니다.연산의 개수를 입력한 데이터의 개수 n의 함수로 나타낸 것을 시간 복잡도 함수라고 말합니다. 시간 복잡도에는 몇 가지 규칙이 있습니다.
+
+1. **입력값(n)은 항상 0보다 크다.**  
+   입력값이 음수일 수는 없습니다. 그래서 복잡도는 항상 0보다 크다고 가정하고 계산을 해야합니다.
+2. **함수는 많은 입력값이 있을 때 더 많은 작업을 하게 됩니다.**  
+   더 많은 입력값이 주어지면 어떤 작업을 하는 데 필요한 계산이나 처리 시간이 길어집니다.
+3. **시간 복잡도에서는 모든 상수를 삭제합니다.**
+   만약 어떤 알고리즘의 복잡도가 3n 이라면 3은 고려하지 않고 복잡도는 n이 됩니다. 2n, 3n, 10n 모두 복잡도가 n 인 알고리즘입니다.
+4. **낮은 차수의 항들은 무시합니다.**  
+   시간 복잡도에서는 입력값이 작은 값은 고려하지 않고 큰 값에 대해서만 생각을 하므로 n 이 무한으로 커진 경우를 가정하고 비교해야 합니다. 이런 이유로 시간 복잡도에서는 낮은 차수의 항들은 무시합니다.
+5. **시간 복잡도 함수가 log 함수를 포함할 경우 밑은 무시합니다.**  
+   모든 로그는 서로 배수 관계입니다. 그래서 복잡도에 관해서 이야기할 때는 로그의 밑에 대해서는 고려하지 않아도 됩니다. 로그의 밑은 무시하고 로그 ( logn ) 알고리즘이라고만 말하면 됩니다.
+6. **등호를 사용하여 표현합니다.**  
+   2n 은 O(n) 과 같습니다. 여기서 O(n) 은 2n 이 어떤 함수의 집합에 속한다는 의미를 가집니다. 그렇기 때문에 아래와 같은 등호를 활용하여 이 관계를 수학적으로 쓸 수 있습니다.
+   2n = O(n), 2n ∈ O(n)
+
+### 접근적 표기법(Big Oh Notation)
+
+시간복잡도는 입력 크기에 대한 함수로 표기하는데 이를 단순한 함수로 표현하기 위해 점근적 표기를 사용합니다. 이는 입력이 무한으로 커질때의 복잡도를 간단하게 표현하기 위한 방법입니다.
+
+![Time Complexity](https://cphinf.pstatic.net/mooc/20210525_284/1621921589246JLuBn_PNG/mceclip0.png)
+
+위 그래프는 복잡도가 n 인 알고리즘에 점근적 표기법을 적용한 결과입니다. x축은 복잡도 n, y축은 필요한 일의 양이나 메모리를 의미합니다.
+
+다른 알고리즘이 이 그래프의 어떤 위치에 있는지에 따라 복잡도 n 인 알고리즘과 다른 알고리즘의 복잡도를 비교할 수 있습니다. 다른 알고리즘이 복잡도 n 인 알고리즘의 아래에 있다면, 같은 일을 하는 데 시간이 덜 들기 때문에 더 빠른 알고리즘이라 합니다. 반대로, 복잡도 n 인 알고리즘의 위에 있다면, 더 느린 알고리즘입니다.
+
+점근적 표기법에서는 이러한 알고리즘 간의 관계를 다음과 같이 표현합니다.
+
+- **O (빅 오 복잡도) : 비교 대상인 그래프가 일치 혹은 아래에 있을 때. 비교 대상인 다른 알고리즘과 같거나 더 빠르다**
+- θ (세타 복잡도) : 비교 대상인 그래프가 일치할 때. 비교 대상인 다른 알고리즘과 같다.
+- Ω (빅 오메가 복잡도) : 비교 대상인 그래프가 일치 혹은 위에 있을 때. 비교 대상인 다른 알고리즘과 같거나 느리다.
+- o (리틀 오 복잡도) : 비교 대상인 그래프가 아래에 있을 때. 비교 대상인 다른 알고리즘보다 더 빠르다.
+- ω (리틀 오메가 복잡도) : 비교 대상인 그래프가 위에 있을 때. 비교 대상인 다른 알고리즘과 느리다.
+
+## Big-O 표기 연산시간 크기 관계
+
+![Big-O Complexity](https://blog.chulgil.me/content/images/2019/02/Screen-Shot-2019-02-07-at-2.31.54-PM-1.png)
+Olog(1) < Olog(logn) < Olog(n) < O(nlogn) < O(n^2) < O(n^3) < O(e^n)
+
+## 공간복잡도(Space Complexity)
+
+공간 복잡도(Space Complexity)란 알고리즘을 수행시키기 위해 필요한 기억장치(memory)의 크기를 의미합니다.
+
+공간복잡도는 총 공간 요구 = 고정 공간 요구 + 가변 공간 요구로 나타낼 수 있으며 수식으로는 S(P) = c + Sp(n) 으로 표기합니다.
+
+- 고정 공간: 입력과 출력의 횟수나 크기와 관계없는 공간의 요구(코드 저장 공간, 단순 변수, 고정 크기의 구조 변수, 상수)
+- 가변 공간: 해결하려는 문제의 특정 인스턴스에 의존하는 크기를 가진 구조화 변수들을 위해서 필요로 하는 공간, 함수가 순환 호출을 할 경우 요구되는 추가 공간이다. 즉 동적으로 필요한 공간 동적으로 필요한 공간.
+
+일반적으로 알고리즘의 공간복잡도를 분석할 때는 위의 두 가지 중 두 번째 것을 계산합니다. 공간 복잡도도 시간 복잡도와 유사하게 빅오 표기법을 사용합니다.
+
+```java
+int sum(int a[], int n)
+{
+  int x = 0;
+  for(int i = 0; i < n; i++) {
+    x  = x + a[i];
+  }
+  return(x);
+}
+```
+
+위 알고리즘에서는 총 4 개의 변수를 사용합니다.
+
+- int arr[n] : 4\*n byte (입력 공간)
+- int n : 4 byte (입력 공간)
+- int x : 4 byte (보조 공간)
+- int i : 4 byte (보조 공간)
+
+총 4n + 12의 메모리를 요구하고 이를 빅오 표기법으로 표현하면 O(n)이 됩니다.
 
 ---
 
@@ -2384,6 +2457,274 @@ LIFO에 따라 제일 최근에 삽입된 자료가 가장 먼저 삭제된다.
 
 # 문자열 [☝](#알고리즘)
 
+문장으로 된 자료형을 이야기하고 String으로 나타낸다.
+
+문자열을 생성하는 방법은 아래의 두 가지이다.
+
+```java
+String a = new String("Happy Java");
+String b = "Happy Java";
+```
+
+이때, 두 개의 문자열 객체의 메모리에서의 형태는 아래와 같다.
+
+![image](https://user-images.githubusercontent.com/53392870/133645919-b74267eb-dce4-4f3d-adf2-167d203c6fb5.png)
+
+## String Constant Pool
+
+Heap 영역 내부에서 String 객체를 위해 별도로 관리하는 저장소
+
+new 연산자가 아닌 리터럴("")로 String 객체를 생성하면 다음과 같은 동작이 일어난다.
+
+1. JVM은 String Constant Pool에서 생성하려고 하는 값과 같은 값을 가진 String 객체를 찾는다.
+2. 값을 찾으면 그 객체의 주소 값을 반환해서 String 객체가 해당 주소 값을 참조하도록 한다.
+3. 값을 찾지 못하면 String Constant Pool에 String 객체를 생성하고 그 주소 값을 참조하도록 한다.
+
+예시)
+(1) 리터럴("")로 String 객체를 생성하면 String Constant Pool에 가서 확인하고 없으면 생성한다.
+![image](https://user-images.githubusercontent.com/53392870/133470617-1961d806-7190-4b49-99c7-a9ae27bc7b0e.png)
+
+(2) 있으면 String Constant Pool에 있는 해당 값의 주소 값을 String 객체가 참조하도록 한다.
+![image](https://user-images.githubusercontent.com/53392870/133470791-97d2dfe5-61cf-45f6-85be-3d8b427e171e.png)
+
+### intern() 메소드
+
+리터럴("")로 String 객체를 생성하면 String의 intern() 메소드가 호출된다.
+
+```java
+    /**
+     * Returns a canonical representation for the string object.
+     * <p>
+     * A pool of strings, initially empty, is maintained privately by the
+     * class {@code String}.
+     * <p>
+     * When the intern method is invoked, if the pool already contains a
+     * string equal to this {@code String} object as determined by
+     * the {@link #equals(Object)} method, then the string from the pool is
+     * returned. Otherwise, this {@code String} object is added to the
+     * pool and a reference to this {@code String} object is returned.
+     * <p>
+     * It follows that for any two strings {@code s} and {@code t},
+     * {@code s.intern() == t.intern()} is {@code true}
+     * if and only if {@code s.equals(t)} is {@code true}.
+     * <p>
+     * All literal strings and string-valued constant expressions are
+     * interned. String literals are defined in section 3.10.5 of the
+     * <cite>The Java&trade; Language Specification</cite>.
+     *
+     * @return  a string that has the same contents as this string, but is
+     *          guaranteed to be from a pool of unique strings.
+     */
+    public native String intern();
+```
+intern() 함수에 대한 설명을 보면 **문자열 개체에 대한 표준 표현을 반환**한다고 되어있다. 
+
+pool을 체크해서 같은 값을 가지는 String 객체가 있으면 반환하고, 같은 값을 가지는 String 객체가 없으면 pool에 생성해서 반환한다.
+
+## String 함수
+
+1. length
+
+- int length()
+
+문자열의 길이를 반환한다.
+
+```java
+String str = new String("");
+System.out.println(str.length()); // str 길이 : 0
+		
+str = "absc";
+System.out.println(str.length()); // str 길이 : 4
+
+str = null;
+System.out.println(str.length()); // java.lang.NullPointerException
+
+```
+
+2. compareTo
+
+- int compareTo(String anotherString)
+사전 순으로 문자열의 대소를 비교한다.
+
+- int compareToIgnoreCase(String str)
+대소문자를 무시하고 사전 순으로 비교한다.
+```java
+
+String happy = "Happy";
+String java = "Java";
+		
+System.out.println(happy.compareTo(java));
+// -2, 이유: happy.charAt(0) - java.charAt(0)
+		
+String happylife = "HappyLife";
+System.out.println(happy.compareTo(happylife));
+// -4, 이유: happy.length() - happylife.length();
+// index에서 차이가 나지 않으면 length를 통해서 비교한다.
+		
+String hello = "HELLO";
+System.out.println(hello.compareToIgnoreCase(happy));
+// 4, 이유: hello.charAt(1) - happy.charAt(1);
+```
+
+3. charAt
+- char charAt(int index)
+문자열의 index에 해당하는 문자가 반환된다.
+
+```java
+String str = "Happy Java Hello World";
+
+char strAt6 = str.charAt(6);
+// J
+```
+4. getChars
+
+- void getChars(int srcBegin, int srcEnd, char[] dst, int dstBegin)
+
+문자열을 문자 배열로 복사한다.
+
+```java
+String str = "Happy Java Hello World Happy";
+		
+char[] get_chars = new char[str.length()];
+		
+str.getChars(0, str.length(), get_chars, 0);
+// [H, a, p, p, y,  , J, a, v, a,  , H, e, l, l, o,  , W, o, r, l, d,  , H, a, p, p, y]
+```
+
+5. indexOf
+해당 문자열이 위치하는 인덱스를 반환한다.
+
+- int indexOf(int ch) 
+
+- int indexOf(int ch, int fromIndex)
+fromIndex에서부터 문자열 끝까지 중에서 해당 문자열이 위치하는 인덱스를 반환한다.
+
+- int indexOf(String str)
+
+- int indexOf(String str, int fromIndex)
+
+```java
+String str = "Happy Java Hello World Happy";
+		
+int index_of_str_W = str.indexOf('W');
+		
+// index_of_str_W: 18
+		
+int index_of_str_W_from_18 = str.indexOf('W', 18);
+		
+// index_of_str_W_from_18: -1
+
+int index_of_str_Java = str.indexOf("Java");
+		
+// index_of_str_Java: 6
+
+int index_of_str_Java_from_7 = str.indexOf("Java", 7);
+			
+// index_of_str_Java_from_7: -1
+```
+
+6. replace
+해당 문자를 찾아 입력받은 문자로 변경한다.
+
+- String replace(char old, char new)
+
+- String replace(CharSequence old, CharSequence new)
+(CharSequence는 인터페이스이기 때문에 이것을 구현하는 String, StringBuffer, StringBuilder를 사용하면 된다.)
+
+```java
+String str = "Happy Cava Hello World";
+
+String str1 = str.replace('C', 'J');
+//Happy Java Hello World
+
+String str2 = str.replace("Cava", "Cpp");
+// Happy Cpp Hello World
+```
+
+7. substring
+해당 문자열의 인덱스부터 끝까지(endIndex가 주어졌다면 endIndex - 1까지)의 부분 문자열을 반환한다.
+
+- String substring(int beginIndex)
+
+- String substring(int beginIndex, int endIndex)
+
+```java
+String str = "Happy Java Hello World";
+
+String substring_str = str.substring(6);
+// Java Hello World
+substring_str = str.substring(6, 10);
+// Java
+```
+
+8. concat
+
+- String concat(String str)
+문자열의 맨 끝에 str을 연결한다.
+
+```java
+String str = "Happy Java Hello";
+		
+String concat_str = str.concat(" World");
+// Happy Java Hello World
+```
+9. split
+주어진 regex(표현식)으로 분리한다. limit은 분리되어지는 개수에 제한을 둔 것이다.
+
+- String[] split(String regex)
+
+- String[] split(String regex, int limit)
+
+```java
+String str = "Happy Java Hello World";
+		
+String[] split = str.split(" ");
+// [Happy, Java, Hello, World]
+
+split = str.split(" ", 3);
+// [Happy, Java, Hello World] 분리되어지는 개수를 limit 만큼으로 제한한다.
+```
+## String, StringBuffer, StringBuilder
+
+<table>
+<tr>
+    <td>클래스</td>
+<td> 속성</td>
+<td>특징</td>
+</tr>
+<tr>
+    <td>String</td>
+<td>불변(immutable), 동기화 O</td>
+<td>
+
+- 불변성으로 인해 문자열 추가, 수정, 삭제 등의 연산에서 불리하게 작용한다.
+
+</td>
+</tr>
+<tr>
+    <td>StringBuffer</td>
+<td> 가변(mutable). 동기화 O</td>
+<td>
+
+- 가변적이기 때문에 문자열 추가, 수정, 삭제 연산 시 사용된다.
+- 동기화를 지원해서 멀티쓰레드 환경에서 안전하다. (thread-safe)
+- StringBuilder에 비해 성능이 좋지 않다.
+
+</td>
+</tr>
+<tr>
+    <td>StringBuilder</td>
+<td>  가변(mutable), 동기화 X</td>
+<td>
+
+- 가변적이기 때문에 문자열 추가, 수정, 삭제 연산 시 사용된다.
+- 동기화를 지원하지 않기 때문에 멀티쓰레드 환경에서 사용하는 것은 적합하지 않다.
+- 단일쓰레드에서의 성능은 StringBuffer보다 좋다.
+
+</td>
+</tr>
+</table>
+
 ---
 
 # 해시 [☝](#알고리즘)
@@ -2391,6 +2732,188 @@ LIFO에 따라 제일 최근에 삽입된 자료가 가장 먼저 삭제된다.
 ---
 
 # B-Tree & B+Tree [☝](#알고리즘)
+
+## 디스크 구조의 이해
+- 디스크는 섹터와 트랙으로 나뉘어져있다. </br>
+- 섹터는 디스크 영역을 파이처럼 나눔. </br>
+- 트랙(레벨)은 디스크의 깊이. </br>
+- 블럭은 특정 트랙의 섹터 </br>
+- 블럭이 512 바이트로 이루어져있다고 하면, 0부터 511까지 1바이트씩 이루어져있는데, 1바이트는 각자의 주소를 가지고있다.(그걸 offset이라고 한다.) </br>
+- 디스크의 특정 지점을 읽으려면 섹터,블럭,offset을 알아야 한다. </br>
+
+![image](https://user-images.githubusercontent.com/55073084/133914230-f97e1bb1-71cf-423a-a191-b8e09ee46ea6.png)
+<h6> 참조 : https://velog.io/@seanlion/btree </h6>
+
+## B-Tree의 등장
+디스크 I/O의 기본 단위는 블록입니다. 디스크로부터 데이터를 읽거나 기록할 때 이를 포함하는 디스크 블록 전체를 메모리로 읽어오고 다시 블록 전체를 디스크에 기록하는 방식으로 디스크 I/O가 일어납니다. 디스크에 접근하기 위한 시간은 다음과 같이 구할 수 있습니다.
+
+- Access time = seek time + latency + transfer time;
+> seek time : 디스크 헤드를 정확한 트랙 위로 이동시키는 시간 </br>
+> latency : 디스크를 회전시켜 해당 블록이 디스크 헤드 아래로 오게 하는 시간 (전체 접근 시간의 50%정도 차지) </br>
+> transfer time : 디스크 블록을 메모리로 전송하는 시간 </br>
+
+디스크 접근 시간 단위는 milli-second 단위인데, CPU로의 접근 시간은 mirco-second나 nano-second 단위입니다. 즉 디스크보다 CPU가 적어도 약 1000배~1000000배 정도 빠릅니다. 이렇게 느린 디스크 I/O를 수행하기 위해서는 **색인(index)** 구조가 필요합니다. 색인에 주로 쓰이는 것이 바로 **B-Tree 형제들(B*트리, B+트리, R트리...)** 입니다.
+
+예를들어 데이터베이스가 있고, Employee라는 테이블이 있다고 가정해 봅시다.
+
+<h4> Employee (총 128 byte) </h4>
+
+- eid : 10byte </br>
+- name : 50 byte </br>
+- dept : 10byte </br>
+- section : 8byte </br>
+- add : 50 byte </br>
+
+- 데이터 베이스에는 100개의 record가 있는데, 1개의 record는 128byte입니다. </br>
+- 블록 1개가 512byte니까 1개의 블럭에 4개의 record를 넣을 수 있고, 디스크에 100개의 레코드를 넣으려면 총 25개의 블록이 필요합니다.
+- 이 데이터베이스에서 특정 데이터를 찾으려면 현재 상황으로는 25개의 블록을 하나씩 다 찾아봐야 한다. 운이 없으면 모든 블록을 다 탐색해야 합니다. </br>
+- 그래서 빠른 탐색을 위해서 indexing을 해야 합니다. index에는 eid와 pointer 가 존재합니다. 각각의 pointer는 각각의 eid가 속한 레코드를 가리킨다.(레코드 포인터) </br>
+- index 또한 디스크에 저장되어 있습니다. 단 데이터베이스와 따로 저장되어 있습니다. 100개의 인덱스를 저장하는데에는 4개의 블록이 필요하다. </br>
+- 이제 데이터 탐색을 할 때 인덱스에 접근합니다. 인덱스는 4개의 블록에 있으니까 4개의 블록을 탐색합니다. 그리고 특정 인덱스에서 포인터를 찾아서 그 포인터가 속한 블록으로 들어간다. 그러면 총 5개의 블록을 탐색하게 됩니다. </br>
+
+<h3> 멀티 인덱스 </h3>
+
+- 만약 레코드가 많아져서 1000개가 됐다고 생각해봅시다. </br>
+- 그럼 인덱스를 구성하는 블록의 개수도 40개로 많아지고, 인덱스 탐색의 효용이 작아집니다. </br>
+- 그런 경우에 인덱스를 위한 인덱스를 만드는 방법으로 해결할 수 있습니다. </br>
+- 한 개의 블록에 32개의 인덱스가 들어가니까, 인덱스 of 인덱스에서 1번째 인덱스는 1번째 블록에 들어갈 진입포인트, 2번째 인덱스는 2번째 블록에 들어갈 진입포인트... 등으로 구성합니다. </br>
+
+- 인덱싱 of 인덱싱이 깊어지면 레벨이 생기게 됩니다. 그걸 트리형태로 표현하면 그게 B 트리의 원형이 됩니다. (이런 인덱싱 관리를 매번 수동으로 할 수 없으니 자동으로 self manage high level indexing을 하려고 한게 B트리)
+
+
+## B-Tree
+B-트리는 일반적인 트리 구조인 이진 트리에서 확장되어 **부모가 더 많은 수의 자식을 가질 수 있게 됩니다.** M개의 자식을 가질 수 있도록 설계된 경우, M차 B-트리라고 합니다. 하나의 레벨에 많은 자료가 저장되기 때문에 전체적으로 트리의 높이가 줄어들게 됩니다. 트리의 높이가 줄어든다는 것은 곧 트리의 성능이 높아진다는 것을 의미합니다.(log단위로 성능의 단위가 붙습니다.) 또한 이런식으로 구성된 트리는 **always 균형 잡힌 트리, always Balanced Tree** 가 되어 검색에서든, 삽입에서든, 삭제에서든 **항상 O(logN)의 성능**을 보장합니다!
+
+하나의 노드에 이렇게 많은 데이터를 가질 수 있다는 것은 **대량의 데이터 처리가 필요한 검색 구조에 큰 장점**이 됩니다. 대량의 데이터는 주로 외부 기억 장치에 저장되는데, 외부 기억 장치들은 블럭 단위로 입출력이 일어납니다. 즉 한 블럭이 1024바이트라면 2바이트를 읽어오기 위해서도 1024바이트를, 1000바이트를 읽어오기 위해서도 동일하게 1024바이트를 입출력 비용으로 지불합니다. B-트리는 하나의 노드를 한 블럭 크기 정도로 조절함과 동시에 트리의 균형도 맞춘 로직을 이미 갖추었기에 **데이터베이스 시스템의 인덱스 저장 방식으로 유용하게 쓰입니다.**
+
+### B-Tree의 성립 조건
+- 노드의 데이터 수가 n개라면 자식 노드의 개수는 n+1개입니다.
+![image](https://user-images.githubusercontent.com/55073084/133915399-ab4fe438-a057-4ca7-ad41-3e943203fb0d.png)
+- 노드의 자식노드의 데이터들은 노드 데이터를 기준으로 데이터보다 작은 값은 왼쪽 서브 트리에 큰값들은 오른쪽 서브 트리에 이루어 져야 합니다.
+![image](https://user-images.githubusercontent.com/55073084/133915409-d8df2d9f-9290-4a36-a80f-35f7b69917d1.png)
+- Root 노드가 자식이 있다면 2개이상의 자식을 가져야 합니다.
+- Root 노드를 제외한 모든 노드는 적어도 M/2 개의 데이터를 갖고 있어야 합니다. 3차 B-Tree 까지는 1개의 데이터를 갖고 있어야 하니 고려하지 않아도 되는 조건인것 같습니다. 4차 부터는 Root 노드를 제외하고 노드가 최소 2개의 데이터를 갖고 있어야 합니다.
+![image](https://user-images.githubusercontent.com/55073084/133915423-5057a001-02ef-4744-bf6a-e95ee55ee114.png)
+> 다음과 같은 4차 B-Tree 에서 Root 노드의 데이터 8의 왼쪽 서브트리 노드가 데이터가 1개이므로 조건에 부합하지 않습니다.
+- Leaf 노드로 가는 경로의 길이는 모두 같아야 합니다. 즉 Leaf 노드는 모두 같은 레벨에 존재해야 합니다.
+![image](https://user-images.githubusercontent.com/55073084/133915449-a110f9c7-5d44-483a-96de-a6b2b8b9d3ba.png)
+- 입력 자료는 중복될 수 없습니다.
+
+### B-Tree 탐색
+B-Tree 는 이진트리와 마찬가지로 작은 값은 왼쪽 서브트리, 큰 값은 오른쪽 서브트리에 이루어져있습니다. </br>
+탐색 하고자하는 값을 root 노드 부터 시작해 하향식으로 탐색해 나갑니다. </br>
+
+### B-Tree 삽입
+차수에 따라 B-Tree 알고리즘이 다릅니다. 아래 예시는 3차(홀수) B-Tree의 예시입니다.
+![image](https://user-images.githubusercontent.com/55073084/133915716-0e0f74f9-f97c-4f50-b530-b76ac29563a7.png)
+- 초기 삽입시에는 root 노드를 생성합니다. </br>
+1. 데이터를 탐색해 해당하는 Leaf 노드에 데이터를 삽입합니다.
+2. Leaf 노드 데이터가 가득 차 있으면 노드를 분리합니다. if(노드 데이터 개수 = M(차수))
+    - insert7 에서 노드가 1, 5, 7 로 가득찼습니다.
+    - 정렬된 노드를 기준으로 중간값을 부모 노드로 해서 트리를 구성합니다.
+3. 분리한 서브트리가 B-Tree조건에 맞지 않는다면 부모 노드로 올라가며 merge합니다.
+    - insert12 에서 [9, 7, 12] 를 서브트리로 분리 하였으나 B-Tree 조건에 맞지 않습니다.
+    - Leaf 노드가 모두 같은 레벨에 존재 하지 않습니다.
+    - Root노드와 merge로 조건을 만족시켰습니다.
+
+### B-Tree 삭제
+삭제는 크게 Leaf노드인 경우와 Leaf노드가 아닌경우로 나누어집니다.
+
+<h4> Case 1. 삭제할 노드가 Leaf 노드이며, 삭제하여도 B-Tree 구조를 유지하는 경우에는 그냥 삭제합니다. </h4>
+
+<h4> Case 2. 삭제할 노드가 Leaf 노드이지만 ,삭제하는 경우 B-Tree 구조를 깨는 경우 </h4>
+
+![image](https://user-images.githubusercontent.com/55073084/133915771-24ba2412-0273-478c-855f-80c3554fc881.png)
+
+- Leaf노드에서 1을 삭제하면 B-Tree 구조가 깨집니다.
+- 삭제한 노드의 부모노드로 올라가며 데이터를 가져옵니다.
+- 1의 부무노드와, 형제노드를 merge 합니다. 부모 노드에서 자식노드로 값을 가져오고 자식노드의 형제노드와 merge 합니다. 
+-  root 노드 까지 올라가며 B-Tree 조건에 맞을때까지 이 작업을 반복합니다.
+
+<h4> Case 3. Leaf 노드에 위치하지 않는 데이터를 삭제하는 경우 </h4>
+
+![image](https://user-images.githubusercontent.com/55073084/133915781-76554ef4-54e0-4943-882d-0bc4721a6304.png)
+
+- Leaf노드에 위치하지 않는 데이터를 삭제할 경우 입니다.
+- 먼저, 노드에서 데이터를 삭제하고 왼쪽 서브트리에서 최대값을 노드에 위치시킵니다. 
+- 같은 방식으로 부모노드에서 자식노드로 값을 가져오고 형제노드와 merge 하며 B-Tree조건이 맞을때까지 반복합니다.
+
+
+## B+ Tree
+- B-트리는 특성상 순회 작업이 어렵습니다. B+ 트리는 색인구조에서 순차접근에 대한 문제의 해결책으로 제시되었습니다. 
+- B-트리에서는 특정 key 값이 하나의 노드에서만 존재할 수 있지만, B+ 트리에서는 leaf 노드와 leaf의 부모 노드에서 공존할 수 있습니다. B+ 트리의 비단말 노드(not leaf)들은 데이터의 빠른 접근을 위한 인덱스 역할만 하기 때문입니다. (index set 이라 불린다) </br>
+- 그리고 leaf 노드들은 연결 리스트 형태로 서로 연결되어 있고 이를 순차집합(sequence set)이라고 하며 오름차순으로 정렬이 되어 있습니다. 
+- 고로 **B+ 트리는 (기존의 B-트리 + 데이터의 연결 리스트)로 구현된 색인구조**라고 할 수 있습니다.
+
+### B+ Tree의 특징
+![image](https://user-images.githubusercontent.com/55073084/133915889-6a6a9f08-1dd5-415a-8d87-548d6be34c09.png)
+- **모든 key, data가 리프노드에 모여있습니다.** B트리는 리프노드가 아닌 각자 key마다 data를 가진다면, B+트리는 리프 노드에 모든 data를 가집니다.
+
+- **모든 리프노드가 연결리스트의 형태**를 띄고 있습니다. B트리는 옆에있는 리프노드를 검사할 때, 다시 루트노드부터 검사해야 한다면, B+트리는 리프노드에서 선형검사를 수행할 수 있어 시간복잡도가 굉장히 줄어듭니다.
+
+- **리프노드의 부모 key는 리프노드의 첫번째 key보다 작거나 같습니다.** 그림의 B+트리는 리프노드의 key들을 트리가 가지고 있는 경우여서, data 삽입 또는 삭제가 일어날 때 트리의 key에 변경이 일어납니다. 해당 경우뿐만 아니라 data의 삽입과 삭제가 일어날 때 트리의 key에 변경이 일어나지 않게 하여 더욱 편하게 B+트리를 구현하는 방법도 존재하기 때문에 작거나 같다라는 표현을 사용하였습니다.
+
+### B+ Tree의 탐색, 삽입, 삭제
+<h4> 탐색 </h4> 
+
+B-Tree와 동일하게 탐색합니다. B-Tree와 다르게 Leaf 노드가 순차적으로 linked list를 구성하고 있어, 순차적 처리가 가능합니다.
+
+<h4> 삽입 </h4> 
+
+삽입의 과정도 B트리와 매우 유사하지만 리프노드에서 최대 key개수를 초과할 때가 다릅니다.
+
+<h4> Case 1. 분할이 일어나지 않고, 삽입 위치가 리프노드의 가장 앞 key 자리가 아닌 경우 </h4>
+- B트리와 똑같은 삽입 과정을 수행합니다.
+
+<h4> Case 2. 분할이 일어나지 않고, 삽입 위치가 리프노드의 가장 앞 key 자리인 경우 </h4>
+- 삽입 후 부모 key를 삽입된 key로 갱신하고, data를 넣어줍니다.
+
+<h4> Case 3. 분할이 일어나는 삽입과정 </h4>
+
+- 분할이 일어나는 노드가 리프노드가 아니라면 기존 B트리와 똑같이 분할을 진행합니다. 중간 key를 부모 key로 올리고, 분할한 두개의 노드를 왼쪽, 오른쪽 자식으로 설정합니다.
+
+- 분할이 일어나는 노드가 리프노드라면 중간 key를 부모 key로 올리지만, 오른쪽 노드에 중간 key를 포함하여 분할합니다. 또한 리프노드는 연결리스트이기 때문에 왼쪽 자식노드와 오른쪽 자식 노드를 이어줘 연결리스트 형태를 유지합니다. 해당 부분이 B트리의 분할과 다른 점입니다.
+
+<h4> 삭제 </h4> 
+삭제과정 역시 기존 B트리와 유사합니다. 하지만 삭제할 key k는 무조건 리프노드에 존재하는 점, k를 삭제하기 위해 검색하는 과정에서 index에 존재할 수 있다는 점이 다릅니다. 
+
+<h4> Case 1. 삭제할 key k가 index에 없고, 리프노드의 가장 처음 key가 k가 아닌경우 </h4>
+
+기존의 B트리 삭제과정과 동일합니다.
+
+<h4> Case 2. 삭제할 key k가 리프노드의 가장 처음 key인 경우 </h4>
+
+1) Index 부분은 다른 key 값을 찾는데 사용될 수 있기 때문에 leaf node의 값이 삭제되어도 삭제하지 않습니다. <br>
+2) 재배치할 경우 index 부분의 node의 key 값은 변하지만 tree 구조는 변하지 않습니다. <br>
+3) 합병을 할 경우 index 부분에서도 key 값을 삭제합니다. <br>
+
+참조 및 자세한 설명 : https://velog.io/@emplam27/%EC%9E%90%EB%A3%8C%EA%B5%AC%EC%A1%B0-%EA%B7%B8%EB%A6%BC%EC%9C%BC%EB%A1%9C-%EC%95%8C%EC%95%84%EB%B3%B4%EB%8A%94-B-Plus-Tree
+
+<hr>
+
+## B-Tree & B+ Tree 간단비교
+### 공통점
+
+1. 모든 leaf의 depth가 같다
+
+2. 각 node에는 k/2 ~ k 개의 item이 들어있어야 한다.
+
+3. search가 비슷하다.
+
+4. add시 overflow가 발생하면 split 한다
+
+5. delete 시 underflow가 발생하면 redistribution하거나 merge 한다.
+
+
+### 차이점
+
+1. B-tree의 각 노드에서는 key 뿐만 아니라 data도 들어갈 수 있다. 여기서 data는 disk block으로의 포인터가 될 수 있다.
+  B+tree는 각 node에서는 key만 들어가야 한다. 그러므로 B+tree에서는 data는 오직 leaf에만 존재한다.
+
+2. B+tree는 B-tree와는 달리 add, delete가 leaf에서만 이루어진다.
+
+3. B+ tree는 leaf node 끼리 linked list로 연결되어 있다.
+
 
 ---
 
@@ -4424,10 +4947,95 @@ public class PrimTest {
 ---
 
 # 네트워크 유량 [☝](#알고리즘)
+네트워크 유량이란 유방향 그래프에 용량이 존재하는 것이다. 유량의 시작 정점을 Source, 끝 정점을 Sink라고 한다.<br>
+이 때, Source에서 Sink로 흘려보낼 수 있는 최대 유량(flow)을 구하는 문제를 네트워크 유량 문제라고 한다.
+
+- `유량(flow)` : 두 정점 사이에서 현재 흐르는 양
+- `용량(capacity)` : 두 정점 사이에 최대로 흐를수 있는 양
+- `잔여 용량(residual capacity)` : 두 정점 사이에서 현재 더 흐를 수 있는 유량. (용량 - 유량)
+- `소스(source)` : 유량이 시작되는 정점. 보통 S로 표현
+- `싱크(sink)` : 유량이 도착하는 정점. 보통 T로 표현
+- `증가 경로(augmenting path)` : S에서 T로 유량이 흐르는 경로 
+
+<p align="center"><img src="https://user-images.githubusercontent.com/51703260/133916224-1b022950-880b-436a-b105-885ed3c305ed.png"></p>
+
+위 이미지와 같은 네트워크 유량이 있다고 하자.
+
+S에서 1로 갈 수 있는 유량은 2, 2로 갈 수 있는 유량은 3이다.<br>
+S에서 1로 2만큼 유량이 흘러갔다면, 1에서 T로 용량은 3이지만 S에서 1로 흘러 들어온 2만큼만 유량을 보낼 수 있다.<br>
+마찬가지로, S에서 2로 갈 수있는 유량은 3이라 3을 흘려 보냈더라도 2에서 T로 흐를 수 있는 용량이 2라서 2만큼만 유량을 보낼 수 있다.<br>
+결과적으로 위 그래프는 S에서 T로 4를 흘러보내주게 되고, 최대 유량이 4라고 한다.
+
+네트워크 유량 문제가 성립하기 위해서는 3가지 약속이 있다.<br>
+일단 네트워크 유량에서는 위에서" S에서 1로 갈 수 있는 유량은 2, 2로 갈 수 있는 유량은 3이다"<br>
+라는 표현을 `c(S,1)` = 2, `c(S,2)` = 3 이라고 간단하게 표현할 수 있다.
+
+- `c(u,v)` : `capacity` 정점 u에서 v로 가는 간선의 용량
+- `f(u,v)` : `flow` 정점 u에서 v로 실제 흐르는 유량
+- `r(u,v)` : `residual` 정점 u에서 v로 가는 잔여 용량 `r(u,v)` =  `c(u,v)` - `f(u,v)`
+
+**1) 용량 제한 속성 `f(u,v)` <= `c(u,v)` :**
+
+두 간선 사이에서 흐르는 유량은 용량을 넘을 수 없다.
+ 
+**2) 유량의 대칭성 `f(u,v)` = `-f(v,u)` :**
+
+u->v로 2만큼 흐른다면, v->u엔 -2만큼 흐른다.
+쉽게 생각하면, 'u->v로 2만큼 나가고 v->u로 2만큼 들어온다.' 라고 이해하면 된다.
+
+**3) 유량 보존의 법칙 `∑f(u,v)` = 0 :**
+
+S 와 T를 제외하고는 각 정점에서 들어오는 유량과 나가는 유량이 일치해야 한다.
+그래서 유량의 대칭성 때문에 S와 T를 제외하고 유량을 모두 합하면 0이 되어야 한다.
 
 ---
 
 # 포드-풀커슨 알고리즘 [☝](#알고리즘)
+최초의 네트워크 유량 알고리즘<br>
+개념과 구현이 간단하다.
+
+### 개념
+1. 각 간선의 용량을 입력받는다.
+2. DFS(포드-풀커슨)또는 BFS(에드몬드-카프)를 이용하여 `r(u,v)` > 0인 증가 경로를 찾는다.
+3. 찾은 증가 경로 상에서 `r(u,v)`이 가장 낮은 엣지를 찾는다.
+4. 잔여 용량만큼 S에서 T까지 유량을 흘려보낸다(경로의 모든 엣지에 유량 추가).
+5. 더 이상 증가 경로가 발견이 되지 않을 때까지 반복한다.
+
+아래 그래프를 가지고 포드-풀커슨 알고리즘의 과정을 살펴 보면,
+
+<p align="center"><img src="https://user-images.githubusercontent.com/51703260/133918099-b2b92772-fdf9-401b-a51e-dcf4be73666a.png"></p>
+
+S->a->T 라는 증가 경로를 먼저 찾고, 그 다음 S->b->T라는 증가 경로를 찾아서 최대 유량을 찾을 수도 있다.
+
+<p align="center"><img src="https://user-images.githubusercontent.com/51703260/133918097-a56dd01d-465e-49d5-9bc4-ee35c1496d38.png"></p>
+
+하지만, 만약 S->a->b->T라는 증가 경로를 가장 먼저 찾았는데, 이때 흘려 보낼수 있는 플로우는 1을 보내고 나니 그 다음 유량을 흘려 보낼 수 있는 루트를 찾아보니 없다.
+
+여기서 위에서 살펴 보았던 **2) 유량의 대칭성** `f(u,v)` = `-f(v,u)`의 개념이 이용된다.<br>
+현재 `c(a,b)`는 1이다. 그리고 `c(b,a)`는 경로가 존재하지 않으니 0이다.<br>
+그리고 `f(a,b)`도 방금 **S->a->b->T** 라는 증가 경로로 유량이 흘렀기 때문에 1이 되고, 유량의 대칭성에 의해서 `f(b,a)`은 -1이 된다.
+
+<p align="center"><img src="https://user-images.githubusercontent.com/51703260/133918095-0f78c106-146f-400a-bb93-5f778eff21c2.png"></p>
+
+그러면 놀랍게도 잔여 용량 `r(b,a)`(`c(b,a)` - `f(b,a)`)은 0 - (-1)로, b에서 a로 흐르는 잔여 용량이 1이 된다.<br>
+즉, 유량을 하나 보내는 것은 반대 방향으로도 유량을 하나 보낼 수 있는 작업이 동반된다고 생각하면 된다.<br>
+이렇게 Back-Edge라고 불리는 역간선 덕분에 포드-풀커슨 알고리즘이 성립 가능하게 된다.
+
+그러면 결과적으로는 어떤 경로를 선택하든 최대 유량을 구할 수 있다.
+
+### 시간복잡도
+시간복잡도는 O((V+E)F) 인데, E가 V를 도미넌트 하므로 보통 O(EF)라고 표현한다.
+
+<p align="center"><img src="https://user-images.githubusercontent.com/51703260/133918373-6225171c-4826-44af-906e-8ccf3a9299ab.png"></p>
+
+위와 같은 케이스가 포드-풀커슨 알고리즘의 워스트 케이스인데,  증가경로 한개당 플로우 1밖에 보낼 수 없다.<br>
+그래서 DFS를 플로우 수만큼 사용해야 하는데 플로우 수가 크다면 스택 오버플로우가 발생할 수 있다.<br>
+이러한 케이스는 BFS로 문제를 해결하는 에드먼드-카프 알고리즘에서 극복이 가능하다고 한다.
+
+#### 대표문제
+[백준 6086 : 최대 유량](https://www.acmicpc.net/problem/6086)
+
+네트워크 유량 문제는 포드-풀커슨 알고리즘 외에도 에드먼드-카프 알고리즘, 최소컷, 이분매칭 MCMF, 디닉 알고리즘의 개념들과 그래프를 어떻게 설계해야하는지에 대한 다양한 방법들에 대한 공부가 필요하다고 합니다...
 
 ---
 
