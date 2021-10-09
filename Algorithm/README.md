@@ -22,6 +22,7 @@
 	3. [선형 자료구조](#선형-자료구조-)
 	4. [큐와 스택, 데크](#큐와-스택과-데크-)
 	5. [문자열](#문자열-)
+		1. [KMP 알고리즘](#KMP-알고리즘-)
 	6. [해시](#해시-)
 	7. [B-Tree & B+Tree](#b-tree--btree-)
 5. [트리](#트리)
@@ -45,8 +46,7 @@
    6. [네트워크 유량](#네트워크-유량-)
       1. [포드-풀커슨 알고리즘](#포드-풀커슨-알고리즘-)
       2. [에드몬드-카프 알고리즘](#에드몬드-카프-알고리즘-)
-      3. [네트워크 모델링](#네트워크-모델링-)
-      4. [이분 매칭](#이분-매칭-)
+      3. [이분 매칭](#이분-매칭-)
 7. [정렬](#정렬)
 	1. [삽입 정렬](#삽입-정렬-)
 	2. [선택 정렬](#선택-정렬-)
@@ -2724,10 +2724,322 @@ split = str.split(" ", 3);
 </td>
 </tr>
 </table>
+<br>
+
+# KMP 알고리즘 [☝](#알고리즘)
+
+## 문자열에서 패턴 찾기
+![](https://images.velog.io/images/hongcheol/post/612ca0a4-e76a-456d-855e-6f9ed4743579/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-09-24%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%2010.04.44.png)
+위의 그림과 같이 문서에서 찾고자하는 단어가 있을 때, 찾기 기능을 안 써본 사람은 없을 것입니다.
+이 때 문서(이하 문자열)에서 찾고자하는 단어(이하 패턴)를 찾을 때 아래와 같이 하나하나 찾아보는 방식을 떠올리기 쉽습니다.
+![](https://images.velog.io/images/hongcheol/post/44439dc5-f123-4ac9-90ae-a9198bfb3815/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-09-23%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%2011.12.14.png)
+위의 그림에서 빨간색으로 칠해진 부분은 불일치가 발생한 부분입니다. 
+불일치가 발생하면 해당 시작 위치는 정답을 위한 시작위치가 될 수 없습니다.
+위의 그림에서처럼 하나하나 찾다보면 전체 문자열의 길이를 N, 패턴의 길이를 M이라하면 O(NM)의 시간만큼 소요될 것입니다.
+
+이런 문자열에서 패턴을 찾는 것을 O(N+M)까지 줄여줄 수 있는게 바로 KMP 알고리즘입니다.
+
+## KMP 알고리즘은 무엇인가
+KMP 알고리즘은 문자열 탐색 알고리즘입니다.
+
+주어진 문자에서 찾고자하는 패턴을 찾아내기 위한 과정에서 불필요한 연산을 줄여서 수행시간을 개선한 알고리즘입니다.
+
+KMP 알고리즘에서 주목해야할 점은 **보지 않고도 알 수 있는 것**입니다.
+
+KMP 알고리즘은 문자열에서 패턴을 탐색하는 과정에서 얻는 정보를 버리지 않고 활용합니다.
+
+**그렇다면 어떤 정보를 사용할까요??**
+
+문자열을 탐색하다보면 비교과정에서 불일치하는 부분이 발생합니다.
+이 때, 불일치가 발생한 텍스트 문자열의 앞 부분에 어떤 문자가 있는지에대한 정보를 사용합니다.
+미리 알고 있어서 불일치가 발생한 앞부분 중 비교하지않고도 알 수 있는 부분을 건너뛰어 불필요한 비교를 하지않고 매칭을 수행할 수 있습니다.
+
+KMP 알고리즘에서는 건너뛴 새로운 시작 위치를 **접두사와 접미사**를 이용해서 결정합니다.
+
+
+## KMP 알고리즘의 구조
+1. 전처리 과정(부분일치 테이블)
+2. 문자열 탐색(패턴 포인터를 움직임)
+
+제가 KMP를 처음 접했을 때, 가장 헷갈렸던 것은 **부분일치 테이블의 생성 시기**와 **새로운 탐색위치**였습니다. 
+
+찾아야하는 패턴은 불변이라는 것만 생각하면 패턴 찾기 전에 **미리 부분일치 테이블을 만들어놓은 후**에 탐색할 때 사용해도 아무 문제없다는 것을 알 수 있습니다. 
+이 때, 부분일치 테이블의 값을 정하는 기준은 **현재 시작 위치에서 문자열(H)과 패턴(N)을 비교했을 때, 몇 글자나 일치했는가**입니다.
+
+이를 확인하기 위해서 접두사와 접미사를 사용하는데, 그 이유는 아래의 그림 한 장으로 설명이 가능합니다.
+![](https://images.velog.io/images/hongcheol/post/02222ecf-880c-4ec6-bf5e-8555597fc30b/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-09-24%20%E1%84%8B%E1%85%A9%E1%84%8C%E1%85%A5%E1%86%AB%2012.28.26.png)
+
+위 그림은 패턴 매칭을 시작한 위치 i에서 H와 N을 맞춰봤을 때, matched 글자가 일치한 후에 그 다음 글자에서 불일치가 발생한 상황입니다. 
+다음 비교는 불일치가 발생하기 전까지 일치한 패턴의 부분문자열의 접미사와 패턴의 접두사가 일치하는만큼은 안봐도 일치함을 알 수 있습니다.
+위의 그림에서 A,B는 직전까지 확인을 진행했던 부분의 접미사이고 C는 접두사입니다.
+
+간단히 말해, 직전까지 확인했던 문자열 중에서 불일치가 발생한 시점으로부터 **matched-k** 길이의 접미사와 패턴의 시작점부터 **matched-k** 길이의 접두사가 같다면 접두사 부분은 이미 일치한다는 것이 보장된 상태입니다. 
+따라서 **matched-k**길이만큼은 비교하지않고 그 다음부터 패턴이 일치하는지 확인을 진행해도 문제가 없습니다.
+
+이런 특징은 불필요한 비교를 줄여줄 강력한 무기가 됩니다.
+
+그래서 답이 될 수 있는 바로 다음 위치를 찾기 위해서 N의 각 접두사에대해서 접두사도 되고 접미사도 되는 문자열의 최대 길이를 계산해놓는다면, 현재 확인하는 문자열의 포인터는 가만히 놔둔 상태로 패턴의 포인터만 옮겨서 새로운 시작 포인트에서 비교를 진행할 수 있습니다.
+
+이 때, 최대 길이를 계산하는 부분에 사용되는 것이 바로 **부분일치 테이블**입니다.
+
+## 부분일치 테이블
+매칭이 실패했을 때, 패턴 포인터가 돌아갈 곳을 계산해놓은 테이블로 게임에서 볼 수 있는 세이브 포인트와 비슷한 개념입니다.
+
+일치하는 것이 실패했을 때, 어떻게 해야할지를 알려주는 배열이라는 의미에서 실패 함수라고 부르기도 합니다.
+
+실패함수는 보통 pi[] 배열을 이용해서 표현합니다.
+
+>pi[i] = 패턴의 시작부터 i번째 문자로 구성된 부분 문자열의 접두사도 되고 접미사도 되는 문자열의 최대 길이
+
+pi[ ]는 패턴이 어디까지 일치했는지 주어질 때, 다음 시작위치를 어디로 해야할지를 저장하고 있는 배열입니다. 
+부분 일치했을 때, 다음 시작 위치를 알려주는 특성 때문에 부분일치 테이블이라고 합니다.
+
+부분일치 테이블이 담고있는 정보는 새롭게 탐색을 진행해야하는 패턴 내의 위치입니다. 테이블에는 접두사도 되면서 접미사도 되는 문자열의 최대 길이가 담겨있기 때문에, 이를 이용해 패턴의 시작점부터 그 길이만큼은 비교를 생략할 수 있습니다.
+
+다음은 부분일치 테이블을 만드는 그림입니다.
+![](https://images.velog.io/images/hongcheol/post/f65b9799-59b6-4da6-84c5-3e9f41f7c5a4/kmp.gif)
+i번째 위치에서 불일치가 발생하면, i-1번째 위치까지는 일치한 것이기 때문에, pi[i-1]에 해당하는 위치부터 다시 탐색을 시작해야함을 알 수 있습니다.
+
+
+부분일치 테이블을 만드는 방식은 다음과 같습니다. 
+방식 1
+```java
+for(int i=1, j=0; i<pLength; i++){// i:접미사 포인터(i=1부터 시작, j:접두사 포인터
+	while(j > 0 && pattern[i] != pattern[j]) {
+		j = pi[j-1];  
+	}
+	if(pattern[i] == pattern[j]) pi[i] = ++j;
+}
+```
+방식 2(KMP 알고리즘 적용)
+```java
+//모든 접두사에대해 한꺼번에 계산하는 방식
+int[] pi = new int[pLength];
+int start = 1, partialMatched = 0;
+while(start+partialMatched<pLength){
+	if(P[start+partialMatched]==P[partialMatched]){
+                ++partialMatched;
+                pi[start+partialMatched-1] = partialMatched;
+	}else{
+    		if(partialMatched == 0){
+            	    start++;
+            	}else{
+                 	start += partialMatched-pi[partialMatched-1];
+                 	partialMatched = pi[partialMatched-1];
+            	}
+      	}
+}
+```
+## 문자열 탐색
+탐색은 정말 간단합니다.
+틀린 위치가 발생하면, pi[지금까지 맞은 문자의 갯수-1]에 해당하는 위치부터 탐색을 시작하게해주면 됩니다.
+
+또한, 문자 패턴을 찾은 경우에는 시작 위치를 답의 리스트에 추가해야한다는 것을 제외하면 불일치가 발생한 경우와 같습니다.
+
+리스트에 추가해준 다음, 문자열의 다음 위치와 비교를 하도록 포인터를 설정하고, 답이 될 수 있는 다음 후보인 패턴의pi[matched-1]째 위치부터 시작을 해주면 됩니다.
+```java
+int matched = 0;
+List<Integer> list = new ArrayList<>();
+for(int i = 0;i<sLength;i++){
+	while(matched > 0 && S[i]!=P[matched]) matched = pi[matched-1];
+	if(S[i] == P[matched]){
+    		++matched;
+                if(matched==pLength){
+                    list.add(i-pLength+1);
+                    matched = pi[matched-1];
+             	}
+      	}
+}
+```
+위의 코드는 아래와 같이 작동합니다.
+![](https://images.velog.io/images/hongcheol/post/cd387206-f8d9-4dc2-9855-ac7180840bf8/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-09-24%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%209.36.27.png)![](https://images.velog.io/images/hongcheol/post/59a9f891-6a5a-4e77-b8c0-76221af6721e/%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B3%E1%84%85%E1%85%B5%E1%86%AB%E1%84%89%E1%85%A3%E1%86%BA%202021-09-24%20%E1%84%8B%E1%85%A9%E1%84%92%E1%85%AE%209.35.24.png)
+
+
+이런 식으로 안봐도 불가능하다고 판단되는 비교는 하지않아서 시간 복잡도를 
+O(N+M)(N(텍스트의 길이),M(패턴의 길이)) 까지 줄일 수 있습니다.
+
+## 코드 구현
+KMP 알고리즘을 적용하면 풀 수 있는 문제의 풀이를 보며 구현을 설명하겠습니다.
+[문제 보러가기](https://www.acmicpc.net/problem/1786)
+
+```java
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
+public class BOJ_1786 {
+    static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+    static char[] S,P;
+    static StringBuilder sb = new StringBuilder();
+    public static void main(String[] args) throws IOException {
+        S = br.readLine().toCharArray();
+        P = br.readLine().toCharArray();
+        int sLength = S.length,pLength = P.length;
+        if(pLength>sLength) {
+            System.out.println(0);
+            return ;
+        }
+        //부분 일치 테이블
+        int[] pi = new int[pLength];
+        int start = 1, partialMatched = 0;
+        while(start+partialMatched<pLength){
+            if(P[start+partialMatched]==P[partialMatched]){
+                ++partialMatched;
+                pi[start+partialMatched-1] = partialMatched;
+            }else{
+                if(partialMatched == 0){
+                    start++;
+                }else{
+                    start += partialMatched-pi[partialMatched-1];
+                    partialMatched = pi[partialMatched-1];
+                }
+            }
+        }
+        int matched = 0;
+        List<Integer> list = new ArrayList<>();
+        for(int i = 0;i<sLength;i++){
+            while(matched > 0 && S[i]!=P[matched]) matched = pi[matched-1];
+            if(S[i] == P[matched]){
+                ++matched;
+                if(matched==pLength){
+                    list.add(i-pLength+1);
+                    matched = pi[matched-1];
+                }
+            }
+        }
+        sb.append(list.size()).append('\n');
+        for(int data : list){
+            sb.append(data+1).append('\n');
+        }
+        System.out.println(sb.toString());
+    }
+}
+```
 
 ---
 
 # 해시 [☝](#알고리즘)
+
+## Hash Table
+
+`hash` 는 내부적으로 배열을 사용해 데이터를 저장하기 때문에 빠른 검색 속도를 갖는다.
+데이터를 검색할 때 사용할 `key` 와 실제 데이터 값 `value` 이 한 쌍으로 존재하고, `key` 값이 배열의 인덱스로 변환된다.
+특정한 값을 검색하는데 데이터 고유의 인덱스로 접근하게 되므로 **평균적으로 O(1)** 의 시간복잡도를 갖는다.
+*(항상 O(1)은 아니고 평균적으로 O(1)이다. 항상 O(1)이 아닌 이유는 **충돌** 때문이다.)*
+하지만 문제는 인덱스로 저장되는 `key` 값이 불규칙하다는 것이다.
+
+그래서 **특별한 알고리즘**을 이용해 저장할 **데이터와 연관된 고유한 숫자**를 만들어 내고 이를 `key` 로 이용한다.
+특정 데이터가 저장되는 인덱스는 해당 데이터만의 고유한 위치이기 때문에, 데이터를 삽입할 때 다른 데이터의 사이에 저장되거나, 삭제 시 다른 데이터로 채울 필요가 없어 추가적인 연산 비용이 없도록 만들어졌다.
+<br/>
+
+## Hash Function
+
+데이터의 `value` 를 배열의 인덱스인 `key` 로 변환하기 위해 일련의 과정이 필요한데, 이 과정에서 사용하는 함수/메소드를 `hash method` 또는 `hash function` 이라고 한다.
+이 메소드에 의해 반환된 데이터의 고유한 key값을 `hashcode` 라고 한다.
+**저장되는 `value` 값을 해시 함수를 통해 정수형의 값들로 바꿔준다.**
+
+충분히 확인되지 않은 어설픈 해시 함수를 사용해 `key` 값들을 결정한다면 동일한 값이 도출될 수 있다.
+이렇게 되면 **동일한 `key` 값에 복수개의 데이터가 하나의 해시 배열에 존재할 수 있게 되는 것**인데 이를 `충돌(Collision)` 이라고 한다.
+즉, **충돌**은 **서로 다른 두 개의 키가 같은 인덱스로 hashing되면 같은 곳에 저장할 수 없게 되는 것**을 말한다.
+
+✅    **`hash function` 의 조건**
+일반적으로 좋은 해시 함수는 `key` 의 일부분을 참조해 해시값을 만들지 않고 **키 전체를 참조**해 해시 값을 만들어 낸다.
+하지만 좋은 해시 함수는 `key` 가 어떤 특성을 가지고 있느냐에 따라 달라진다.
+
+해시 함수를 무조건 1:1로 만드는 것보다 **충돌을 최소화하는 방향으로 설계**하고, **발생하는 충돌에 대비해서 어떻게 대응할 것인가가 더 중요**하다.
+1:1 대응이도록 만드는 것이 거의 불가능하기도 하고 그런 해시 함수를 만든다면 보통의 배열과 다를바 없고 메모리를 너무 차지하게 된다.
+
+충돌이 많아질수록 검색에 필요한 시간복잡도가 O(1)에서 O(N)에 가까워진다. 
+어설픈 해시 함수는 해시를 해시답게 사용하지 못하도록 한다.
+좋은 해시 함수를 선택하는 것은 `hash table` 의 성능 향상에 필수적인 것이다.
+따라서 **hashing된 인덱스에 이미 다른 값이 들어 있다면 새 데이터를 저장할 다른 위치를 찾은 뒤에 저장할 수 있는 것**이다.
+따라서 충돌 해결은 필수이다.
+
+<br/>
+
+## Resolve Conflict
+1. **Open Address 방식 (개방주소법)**
+    **해시 충돌이 발생하면(삽입하려는 해시 버킷이 이미 사용 중이라면), 다른 해시 버킷에 해당 자료를 삽입하는 방식**이다.
+    *버킷 : 바구니. 데이터를 저장하기 위한 공간*
+
+    개방주소법 알고리즘은 충돌이 발생하면 데이터를 저장할 장소를 찾는다.
+    `Worst Case` 의 경우 비어있는 버킷을 찾지 못하고 탐색을 시작한 위치까지 되돌아올 수 있다.
+    이 과정에서도 여러 방법들이 존재하는데, 일반적으로 다음 세 방법으로 처리된다.
+
+    - **Linear Probing** : 순차적으로 탐색하여 비어있는 버킷을 찾을 때까지 계속 진행된다.
+    - **Quadratic Probing** : key값을 제곱하여 비어있는 버킷을 찾는다.
+    - **Double Hashing Probing** : 하나의 해시 함수에서 충돌이 발생하면 2차 해시 함수를 이용해 새로운 주소를 할당한다. 위의 두 방법에 비해 많은 연산량이 발생한다. 
+
+2. **Separate Chaining 방식 (분리연결법)**
+    일반적으로 개방주소법은 분리연결법보다 느리다.
+    **개방주소법**은 해시 버킷을 채운 밀도가 높아질수록 `Worst Case` 발생 빈도가 높아진다.
+    반면 **분리연결법**은 해시 충돌이 잘 발생하지 않도록 보조 해시 함수를 통해 조정할 수 있다면 `Worst Case` 에 가까워지는 빈도를 줄일 수 있다.
+    *→ Java7에서는 분리연결법을 사용해 `HashMap` 을 구현하고 있다.*
+
+    ✅  **보조 해시 함수**
+    보조 해시 함수 `supplement hash function` 의 목적은 **`key` 의 해시 값을 변형해 해시 충돌 가능성을 줄이는 것**이다.
+    분리연결법 방식을 사용할 때 함께 사용되며 보조 해시 함수로 `Worst Case` 에 가까워지는 경우를 줄일 수 있다.
+
+    분리연결법은 두가지 구현 방식이 존재한다.
+
+    - **`Linked List` 를 사용**
+        **각각의 버킷들을 연결 리스트로 만들어 충돌이 발생하면 해당 버킷의 리스트에 추가하는 방식**이다.
+        연결 리스트의 특징을 그대로 이어받아 삭제 또는 삽입이 간단하다.
+        또한 버킷을 계속해서 사용하는 개방주소법 방식에 비해 테이블 확장을 늦출 수 있다.
+        하지만 작은 데이터들을 저장할 때 연결 리스트 자체의 오버헤드가 부담이 된다는 단점이 있다.
+
+    - **`Tree` 를 사용**
+        기본적인 알고리즘은 분리연결법 방식과 동일하며 연결 리스트 대신 트리를 사용하는 방식이다.
+        **연결 리스트를 사용할지 트리를 사용할지에 대한 기준은 하나의 해시 버킷에 할당된 `key-value` 쌍의 개수**이다.
+        트리는 기본적으로 메모리 사용량이 많기 때문에 데이터의 개수가 적다면 연결 리스트를 사용하는 것이 맞다.
+        데이터 개수가 적을 때의 `Worst Case` 는 트리와 연결 리스트의 성능 상 차이가 거의 없다.
+        따라서 메모리 측면에서는 트리보다 연결 리스트가 유리하다.
+
+✅  **데이터가 적다는 것은?**
+**어떤 자료구조를 해시 테이블에 사용할지에 대한 기준은 하나의 해시 버킷에 할당된 `key-value` 쌍의 개수**이다.
+이 `key-value` 쌍의 개수가 6개, 8개를 기준으로 결정한다.
+연결 리스트의 기준과 트리의 기준을 6과 8로 결정한 것은 변경하는데 소요되는 비용을 줄이기 위함이다.
+
+**예시로,** 기준을 6과 7로 설정한 경우에서 어떤 해시 버킷에 6개의 `key-value` 쌍이 들어있다.
+그리고 하나의 값이 추가되어서 7개가 된다면 자료구조를 연결 리스트에서 트리로 변경해야 한다.
+그 이후에 바로 하나의 값이 삭제된다면 다시 트리에서 연결 리스트로 자료구조를 변경해야 한다.
+**각 자료구조로 넘어가는 기준 차이가 1이라면 자료구조를 Switching 하는 데 사용되는 비용이 많이 필요하게 되는 것**이다.
+그래서 2라는 여유를 남기고 기준을 잡은 것이다.
+따라서 데이터의 개수가 6개에서 7개로 증가했을 때는 연결 리스트의 자료구조일 것이고, 8개에서 7로 감소했을 때는 트리의 자료구조일 것이다.
+
+<br/>
+
+## Open Address vs Separate Chaining
+두 방식 모두 `Worst Case` 에서 O(N) 이다.
+하지만 **개방주소법은 연속된 공간에 데이터를 저장하기 때문에 분리연결법에 비해 캐시 효율이 높다.**
+따라서 **데이터의 개수가 충분히 적다면 개방주소법이 분리연결법보다 더 성능이 좋다.**
+한 가지 차이점은 분리연결법에 비해 개방주소법이 버킷을 계속 사용한다는 것이다.
+따라서 **분리연결법으로 테이블의 확장을 보다 늦출 수 있다.**
+
+<br/>
+
+## 해시 버킷의 동적 확장 (Resize)
+**해시 버킷의 개수가 적다면 메모리 사용을 아낄 수 있지만 해시 충돌로 인해 성능 상 손실이 발생**한다.
+그래서 **`HashMap` 은 `key-value` 쌍 데이터의 개수가 일정 개수 이상이 된다면 해시 버킷의 개수를 두 배로 늘린다.**
+이렇게 늘리면 해시 충돌로 인한 성능 손실 문제를 어느 정도 해결할 수 있다.
+해시 버킷 크기를 두 배로 확장하는 임계점인 '일정 개수 이상' 이란, 데이터의 개수가 해시 버킷의 개수의 75%가 될 때이다.
+`0.75` 는 `load factor` 라고도 불린다.
+
+<br/>
+
+## 추가
+### 개방 주소법 - Double Hashing Probing
+개방 주소법에서 해시 충돌이 발생한다면, 다른 해시 함수를 사용해서 새로운 해시를 할당 받는다.
+여기서 새로운 해시를 할당 받는 다른 해시 함수를 보조 해시 함수라고도 부른다.
+
+### 분리 연결법 - 보조 해시 함수
+기본적인 개념은 충돌이 발생할 경우 비어있는 버킷을 찾아서 저장하지 않고, 버킷에 데이터를 추가하는 방법이다.
+처음 해시 키값을 연산할 때, 보조적인 해시 함수를 사용할 수도 있다. 즉, 필수적으로 사용되는 것은 아님.
+
+> 두 부분의 차이점이라고 한다면, 더블 해싱은 개방주소법에서 해시 충돌 시 사용되는 검색 방법 중 하나이며, 해시 충돌이 발생했을 경우 보조 해시 함수로 다른 해시코드를 생성한다.
+분리 연결법은 보조 해시 함수를 사용해 해시 키값을 계산할 수도 있고, 아닐 수도 있다.
+
+두 부분에서 사용되는 보조 해시 함수는 크게 분리하지 않아도 될 것 같습니다!
 
 ---
 
@@ -4947,6 +5259,9 @@ public class PrimTest {
 ---
 
 # 네트워크 유량 [☝](#알고리즘)
+
+![9921CE375BB450461A](https://user-images.githubusercontent.com/51703260/134789412-d2455d13-e1e7-4b73-8b19-cab576011eba.png)
+
 네트워크 유량이란 유방향 그래프에 용량이 존재하는 것이다. 유량의 시작 정점을 Source, 끝 정점을 Sink라고 한다.<br>
 이 때, Source에서 Sink로 흘려보낼 수 있는 최대 유량(flow)을 구하는 문제를 네트워크 유량 문제라고 한다.
 
@@ -4991,14 +5306,13 @@ S 와 T를 제외하고는 각 정점에서 들어오는 유량과 나가는 유
 ---
 
 # 포드-풀커슨 알고리즘 [☝](#알고리즘)
-최초의 네트워크 유량 알고리즘<br>
-개념과 구현이 간단하다.
+최초의 네트워크 유량 알고리즘으로 개념과 구현이 간단하다.
 
 ### 개념
 1. 각 간선의 용량을 입력받는다.
-2. DFS(포드-풀커슨)또는 BFS(에드몬드-카프)를 이용하여 `r(u,v)` > 0인 증가 경로를 찾는다.
+2. DFS(포드-풀커슨)를 이용하여 `r(u,v)` > 0인 증가 경로를 찾는다. (DFS 기 때문에 최단경로 아님 )
 3. 찾은 증가 경로 상에서 `r(u,v)`이 가장 낮은 엣지를 찾는다.
-4. 잔여 용량만큼 S에서 T까지 유량을 흘려보낸다(경로의 모든 엣지에 유량 추가).
+4. 찾은 엣지의 `r(u,v)`만큼만 S에서 T까지 유량을 흘려보낸다(경로의 모든 엣지에 유량 추가).
 5. 더 이상 증가 경로가 발견이 되지 않을 때까지 반복한다.
 
 아래 그래프를 가지고 포드-풀커슨 알고리즘의 과정을 살펴 보면,
@@ -5018,36 +5332,404 @@ S->a->T 라는 증가 경로를 먼저 찾고, 그 다음 S->b->T라는 증가 �
 <p align="center"><img src="https://user-images.githubusercontent.com/51703260/133918095-0f78c106-146f-400a-bb93-5f778eff21c2.png"></p>
 
 그러면 놀랍게도 잔여 용량 `r(b,a)`(`c(b,a)` - `f(b,a)`)은 0 - (-1)로, b에서 a로 흐르는 잔여 용량이 1이 된다.<br>
-즉, 유량을 하나 보내는 것은 반대 방향으로도 유량을 하나 보낼 수 있는 작업이 동반된다고 생각하면 된다.<br>
+즉, 유량의 하나 보내는 것은 반대로 유량을 하나 보낼 수 있는 작업이 동반된다고 생각하면 된다.<br>
 이렇게 Back-Edge라고 불리는 역간선 덕분에 포드-풀커슨 알고리즘이 성립 가능하게 된다.
 
 그러면 결과적으로는 어떤 경로를 선택하든 최대 유량을 구할 수 있다.
 
 ### 시간복잡도
+증가경로 한개당 플로우 1밖에 보낼 수 없다.<br>
+그래서 DFS를 플로우 수만큼 사용해야 하는데 플로우 수가 크다면 스택오버플로우가 발생할 수 있다.<br>
 시간복잡도는 O((V+E)F) 인데, E가 V를 도미넌트 하므로 보통 O(EF)라고 표현한다.
 
-<p align="center"><img src="https://user-images.githubusercontent.com/51703260/133918373-6225171c-4826-44af-906e-8ccf3a9299ab.png"></p>
+### 코드
 
-위와 같은 케이스가 포드-풀커슨 알고리즘의 워스트 케이스인데,  증가경로 한개당 플로우 1밖에 보낼 수 없다.<br>
-그래서 DFS를 플로우 수만큼 사용해야 하는데 플로우 수가 크다면 스택 오버플로우가 발생할 수 있다.<br>
-이러한 케이스는 BFS로 문제를 해결하는 에드먼드-카프 알고리즘에서 극복이 가능하다고 한다.
+[최대 유량 : 백준 6086](https://www.acmicpc.net/problem/6086)문제의 포드-풀커슨 알고리즘 풀이이다.
 
-#### 대표문제
-[백준 6086 : 최대 유량](https://www.acmicpc.net/problem/6086)
+```java
+import java.io.*;
+import java.util.*;
 
-네트워크 유량 문제는 포드-풀커슨 알고리즘 외에도 에드먼드-카프 알고리즘, 최소컷, 이분매칭 MCMF, 디닉 알고리즘의 개념들과 그래프를 어떻게 설계해야하는지에 대한 다양한 방법들에 대한 공부가 필요하다고 합니다...
+/*
+ *  메모리		시간
+ *  14388	  140
+ */
+public class BaekOJ6086_배문규_DFS {
+	static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+	static StringBuilder sb = new StringBuilder();
+	static StringTokenizer st = null;
+	
+	static final int MAX_SIZE = 52;
+	static int N, maxFlow, S, T = 25, capacity[][], flow[][];
+	static boolean check[];
+	
+	public static void main(String[] args) throws NumberFormatException, IOException {
+		capacity = new int[MAX_SIZE][MAX_SIZE];
+		flow = new int[MAX_SIZE][MAX_SIZE];
+		check = new boolean[MAX_SIZE];
+		
+		N = Integer.parseInt(br.readLine());
+		for(int i = 0; i < N; i++) {
+			st = new StringTokenizer(br.readLine());
+			int start = charToInt(st.nextToken().charAt(0));
+			int end = charToInt(st.nextToken().charAt(0));
+			int weight = Integer.parseInt(st.nextToken());
+			// 여기서는 그냥 연결이기 때문에 무향 그래프라서 양방향으로 웨이트를 둘 다 더해줌
+			capacity[start][end] += weight; 
+			capacity[end][start] += weight;
+		}
+		
+		// 더 이상 증가경로가 없을 때 까지 반복
+		while(true) {
+			// 방문 체크 초기화
+			Arrays.fill(check, false);
+			// DFS로 최대 유량 찾기
+			int flowAmount = dfs(S, Integer.MAX_VALUE);
+			if(flowAmount == 0) break;
+			maxFlow += flowAmount;
+		}
+		
+		System.out.println(maxFlow);
+	}
+	
+	public static int dfs(int from, int amount) {
+		// 증가경로가 완성되면 해당 증가경로의 최소 잔여용량 리턴
+		if(from == T) return amount;
+
+		// 방문한 곳이면 리턴
+		if(check[from]) return 0;
+		check[from] = true;
+		
+		for(int to = 0; to < MAX_SIZE; to++) {
+			// 유량이 흐를 수 있으면
+			if(capacity[from][to] > flow[from][to]) {
+				// 현재 도달한 경로까지의 최소 잔여용량 저장
+				int flowAmount = dfs(to, Math.min(amount, capacity[from][to]-flow[from][to]));
+				if(flowAmount > 0) {
+					// 잔여용량 갱신하고 리턴
+					flow[from][to] += flowAmount;
+					flow[to][from] -= flowAmount;
+					return flowAmount;
+				}
+			}
+		}
+		
+		return 0;
+	}
+	
+	// 문자를 인덱스로 매핑하기 위해 변환
+	public static int charToInt(char c) {
+		if('a' <= c && c <= 'z') c -= 6;
+		return c - 65;
+	}
+}
+```
 
 ---
 
 # 에드몬드-카프 알고리즘 [☝](#알고리즘)
 
----
+앞서 살펴본 `포드-풀커슨` 알고리즘은 임의의 유량 그래프가 주어졌을 때, 원래 경로가 이미 사용되어 막혀있어도 `Back-Edge` 덕분에 최대 유량은 확실하게 구할 수 있다는 것을 알게되었다.
 
-# 네트워크 모델링 [☝](#알고리즘)
+하지만 최대 유량만 알 수 있지, 우리가 생각하는 유량이 흐르는 실제 경로를 제시하지는 않는다.
+
+아래 유량 그래프를 다시 한 번 예시로 보자.
+
+<p align="center"><img src="https://user-images.githubusercontent.com/51703260/133916224-1b022950-880b-436a-b105-885ed3c305ed.png"></p>
+
+`포드-풀커슨` 알고리즘에서는 S->1->2->T 가 먼저 증가경로로 잡히면, 유량의 대칭성으로 잔여 유량이 1이 생겨 2->1로 갈 수 있는 경로가 생겨서 S->2->1->T라는 증가경로가 생기게 되어서 
+
+- S->1->2->T (유량 1 보냄)
+- S->2->1->T (유량 1 보냄)
+- S->1->2->T (유량 1 보냄)
+- S->2->1->T (유량 1 보냄)
+- **최대 유량 : 4**
+
+이런 방식으로 결국 최대 유량을 알게되었다. 그래서 총 4번의 증가경로 탐색이 필요하다.
+
+이렇기 때문에 위 그래프와 같이 중간에 용량이 1인 엣지가 끼어있는 병목상태에서는 `포드-풀커슨` 알고리즘은 굉장히 비효율적으로 동작할 수 있다.
+
+하지만 실제 유량이 흐르는 증가경로는 아래와 같다.
+
+- S->1->T (유량 2 보냄)
+- S->2->T (유량 2 보냄)
+- **최대 유량 : 4**
+
+위 방식처럼 동작하는 알고리즘이 바로 `에드먼드-카프` 알고리즘이다.
+
+`포드-풀커슨` 알고리즘이 DFS 방식으로 증가경로를 탐색했다면, `에드먼드-카프` 알고리즘은 BFS 방식으로 증가경로를 탐색한다. 
+
+가장 짧은 경로의 증가 경로를 탐색하여 해당 증가경로로 보낼 수 있는 최대의 유량을 한번에 보내면 된다.
+
+즉, 최단거리로 최대의 유량을 보내기 때문에 중간에 용량이 1인 엣지가 끼어있어도 **돌아가는 길이라면** 무시할 수 있는 것이다.
+
+잔여용량이 남은 간선들만을 이용해서 BFS를 반복적으로 수행하고, 찾은 경로들에게 유량을 보내고, 더이상 할 수 없을때까지 보낸 총 유량을 반환하기만 하면 된다.
+
+### 개념
+1. 각 간선의 용량을 입력받는다.
+2. BFS(에드몬드-카프)를 이용하여 `r(u,v)` > 0인 증가 경로 중 최단 거리를 찾는다.
+3. 찾은 증가 경로 중에서 `r(u,v)`이 가장 낮은 엣지를 찾는다.
+4. 찾은 엣지의 `r(u,v)`만큼만 S에서 T까지 유량을 흘려보낸다(경로의 모든 엣지에 유량 추가).
+5. 더 이상 증가 경로가 발견이 되지 않을 때까지 반복한다.
+
+### 시간복잡도
+BFS 한번이 O(E)이고, 증가 경로를 최대 VE번 찾기 때문에 `에드먼드-카프` 알고리즘의 일반적으로 알려진 시간복잡도는 `O(VE^2)`라고 한다.
+
+증가 경로를 최대 VE번 찾는 이유(복잡함)에 대한 더 이상의 자세한 설명은 생략한다.
+
+정확하게는 `min(O(|E|f), O(VE^2))`라고 하는데 만약 간선은 많고, 흘러야 하는 유량이 적을 때는 `O(|E|f)` < `O(VE^2)`이 될 수 있다고 한다.
+
+### 코드
+
+[최대 유량 : 백준 6086](https://www.acmicpc.net/problem/6086)문제의 에드몬드-카프 알고리즘 풀이이다.
+
+```java
+import java.io.*;
+import java.util.*;
+
+/*
+ *  메모리 	시간
+ *  14208	136
+ */
+
+public class BaekOJ6086_배문규_BFS {
+	static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+	static StringBuilder sb = new StringBuilder();
+	static StringTokenizer st = null;
+	
+	static final int MAX_SIZE = 52;
+	static int N, maxFlow, S, T = 25, aPath[], capacity[][], flow[][];
+	static Queue<Integer> queue;
+
+	public static void main(String[] args) throws NumberFormatException, IOException {
+		capacity = new int[MAX_SIZE][MAX_SIZE];
+		flow = new int[MAX_SIZE][MAX_SIZE];
+		
+		N = Integer.parseInt(br.readLine());
+		for(int i = 0; i < N; i++) {
+			st = new StringTokenizer(br.readLine());
+			int start = charToInt(st.nextToken().charAt(0));
+			int end = charToInt(st.nextToken().charAt(0));
+			int weight = Integer.parseInt(st.nextToken());
+			// 여기서는 그냥 연결이기 때문에 무향 그래프라서 양방향으로 웨이트를 둘 다 더해줌
+			capacity[start][end] += weight; 
+			capacity[end][start] += weight;
+		}
+		
+		queue = new ArrayDeque<Integer>();
+		aPath = new int[MAX_SIZE];
+		// 더 이상 증가경로가 없을 때 까지 반복
+		while(true) {
+			// 큐, 증가경로 초기화
+			queue.clear();
+			Arrays.fill(aPath, -1);
+			aPath[S] = S;
+			queue.add(S);
+			
+			// BFS로 최단거리 증가경로 찾기
+			while(!queue.isEmpty() && aPath[T] == -1) {
+				int from = queue.poll();
+				for(int to = 0; to < MAX_SIZE; to++) {
+					// 유량이 흐를 수 있으면서, 아직 방문하지 않았다면
+					if(capacity[from][to] > flow[from][to] && aPath[to] == -1) {
+						queue.offer(to);
+						aPath[to] = from;
+					}
+				}
+			}
+			
+			// 경로가 없으면 종료
+			if(aPath[T] == -1) break;
+			
+			// 찾은 증가 경로의 r(u,v)의 최솟값 (최소 잔여 용량)을 찾음 
+			int flowAmount = Integer.MAX_VALUE;
+			for(int i = T; i != S; i = aPath[i]) 
+				flowAmount = Math.min(capacity[aPath[i]][i] - flow[aPath[i]][i], flowAmount);
+
+			for(int i = T; i != S; i = aPath[i]) {
+				flow[aPath[i]][i] += flowAmount; // 경로들에 유량 흘러줌
+				flow[i][aPath[i]] -= flowAmount; // 유량의 대칭성으로 반대 경로에 - 유량 흘림
+			}
+			
+			maxFlow += flowAmount;
+		}
+		
+		System.out.println(maxFlow);
+	}
+	
+	// 문자를 인덱스로 매핑하기 위해 변환
+	public static int charToInt(char c) {
+		if('a' <= c && c <= 'z') c -= 6;
+		return c - 65;
+	}
+}
+
+```
 
 ---
 
 # 이분 매칭 [☝](#알고리즘)
+
+`이분 매칭(Bipartite Matching)` 알고리즘은 `네트워크 유량` 알고리즘과 연계되는 개념으로, `이분 그래프`에서 두 그룹간의 최대 매칭을 의미한다.
+
+> 즉, `집단 A`가 `집단 B`를 선택하는 방법에 대한 알고리즘이다.
+
+먼저 `이분 그래프`란, 전체 그래프에서 점 들을 두 그룹으로 나누었을 때, 같은 그룹내에는 간선이 존재하지 않게 나눌 수 있는 그래프를 의미한다.
+
+그래프를 나눌 수 있는 경우가 여러가지 있을 수 있지만, 보통 문제에서는 명확히 두 그룹을 분류해주는 경우가 많다.
+
+### 개념
+
+아래 예시를 통해 이분 매칭의 개념을 대해 알아보도록 하자.
+
+네이버 클라우드, 카카오, 삼성전자에 각각 1자리씩 TO가 났고, 위 세 기업에 모두 최종 합격한 3명의 스터디원들이 있다.
+
+
+<img width="866" alt="스크린샷 2021-10-03 오전 2 59 03" src="https://user-images.githubusercontent.com/51703260/135727444-b9ba4b0a-9d3a-4211-948b-e3c79beceebc.png">
+
+위 예시에서는 `집단 A`가 **스터디원** 들이고, `집단 B`는 **기업** 이라고 할 수 있다. 
+
+이와 같이 각 스터디원들이 희망하는 기업들이 미리 정해져 있을 때, 스터디원들이 희망 기업으로 입사하는 경우를 이분 매칭으로 알아보자.
+
+먼저, 위 경우를 아래와 같은 그래프로 표현할 수 있다.
+
+<img width="698" alt="스크린샷 2021-10-03 오전 2 59 50" src="https://user-images.githubusercontent.com/51703260/135727445-5e7d280d-5572-4b7c-b51d-f45f5356a7c0.png">
+
+**이분 매칭은, 두개의 그래프를 최대한으로 연결시켜주는 최대 연결(매칭)을 의미한다.**
+
+즉,  최대한 많은 스터디원들이 희망 기업으로 입사하는 경우를 찾는 문제로 볼 수 있다. 뭔가 느낌이 오지 않는가?
+
+우리가 그전까지 살펴본 `네트워크 유량` 문제 또한 Source에서 Sink로 흘려보낼 수 있는 최대 유량(flow)을 구하는 문제이고,
+
+`이분 매칭` 문제 또한 A에서 B로 갈 수 있는 최다 경우를 구하는 문제이기 때문에, 아래와 같이 **이분 매칭을 네트워크 유량으로 표현할 수 있다.**
+
+<img width="978" alt="스크린샷 2021-10-03 오전 2 59 35" src="https://user-images.githubusercontent.com/51703260/135727447-8d345188-4fc4-42e1-83e8-8cad92173a16.png">
+
+위와 같이 선택을 1가지만 할 수 있는 이분 매칭은 모든 엣지의 용량이 1로 설정된 네트워크 유량 문제로 이해할 수 있다.
+
+우리가 직전에 보았던 에드몬드-카프 알고리즘은 보통 시간 복잡도가 O(V*E^2)라고 알려져 있는데, 이분 매칭의 경우에는 이보다 더 빠르고 효율적으로 알고리즘을 설계할 수 있다.
+
+그게 바로 단순히 **DFS**로 푸는 방법이다. (포드-풀커슨의 DFS가 아닌 그냥 DFS)
+
+<img width="698" alt="스크린샷 2021-10-03 오전 2 59 55" src="https://user-images.githubusercontent.com/51703260/135727449-e6a5ffb5-b5ed-4bae-9551-47341c6d0729.png">
+
+먼저 첫 출발로 문규가 네이버 클라우드를 선택한다. 현재까지는 네이버 클라우드가 아무에게도 선택되지 않았으므로 바로 선택할 수 있다.
+
+<img width="698" alt="스크린샷 2021-10-03 오전 2 59 57" src="https://user-images.githubusercontent.com/51703260/135727452-9ca7f518-c802-4a34-86f4-4e0042b85995.png">
+
+문규의 선택이 끝났다면, 그 다음 경준님이 선택할 차례인데 경준님께서 희망하는 네이버 클라우드는 이미 문규가 선택하고 있는 상황이다.
+
+<img width="698" alt="스크린샷 2021-10-03 오전 2 59 59" src="https://user-images.githubusercontent.com/51703260/135727453-de4ee412-0704-41b1-9956-656e49111f69.png">
+
+이 때, 네이버 클라우드를 선택한 문규가 네이버 클라우드를 제외하고 다른 희망 기업을 선택할 수 있는지 살펴본다. 살펴보니 아직 카카오가 아무에게도 선택되지 않았으므로 카카오를 선택하였다.
+
+그래서 경준님이 네이버 클라우드를, 문규가 카카오를 선택하게 되었다.
+
+<img width="698" alt="스크린샷 2021-10-03 오전 3 00 01" src="https://user-images.githubusercontent.com/51703260/135727454-3ed9986c-9e89-442d-a696-dffe0a07f45d.png">
+
+그 다음 윤주님이 기업을 선택할 차례가 왔다. 윤주님께서 희망하는 카카오는 또 문규가 선택하고 있는 상황이다.
+
+<img width="698" alt="스크린샷 2021-10-03 오전 3 00 03" src="https://user-images.githubusercontent.com/51703260/135727455-e18ebd7f-6934-4847-af89-99bc38bf7135.png">
+
+이 때, 또 카카오를 선택한 문규가 카카오를 제외하고 다른 기업을 선택할 수 없는지 살펴본다. 네이버 클라우드를 혹시나 다시 한번 살펴 봤더니 경준님께서 계속 선택하고 계신 상황이라 선택할 수가 없었다. 
+
+<img width="698" alt="스크린샷 2021-10-03 오전 3 00 05" src="https://user-images.githubusercontent.com/51703260/135727457-2ace68ec-fa73-4eb5-909b-d59d39d80e13.png">
+
+그래서 카카오와 네이버 클라우드를 제외하고 남은 희망 기업중 남아있는 삼성전자를 선택하였다.
+
+<img width="698" alt="스크린샷 2021-10-03 오전 3 00 07" src="https://user-images.githubusercontent.com/51703260/135727458-a596952e-622d-463c-a064-f331657009a8.png">
+
+**이렇게 문규는 삼성전자, 경준님은 네이버 클라우드, 윤주님은 카카오로 매칭되어 입사를 하게 되었다.** 😊
+이 글은 성지가 될 것 입니다
+
+### 시간복잡도
+
+위와 같은 예시처럼 DFS를 이용해 이분 매칭을 간단히 풀 때 시간 복잡도는 `O(V * E)` 이다. 
+
+이 방법은 가장 빠른 속도의 알고리즘은 아니지만 구현이 가장 간단하고 쉽다는 점에서 많이 사용된다.
+
+### 코드
+이분 매칭에 대한 코드는 이분 매칭의 기본 문제라고 할 수 있는 [열혈강호 : 백준 11375](https://www.acmicpc.net/problem/11375)문제를 대표로 하여 작성하였다.
+
+더 효과적인 이분 매칭 코드가 있지만, 일단 가장 간단하게 구현할 수 있는 DFS 풀이부터 숙지하도록 하자.
+```java
+import java.io.*;
+import java.util.*;
+
+/*
+ * 회사에 N명의 직원과, M가지 작업이 있을 때,
+ * 해당 회사가 할 수 있는 최대 일의 개수를 구하시오.
+ * 
+ * 1. 각 직원은 1개의 일을 할 수 있다.
+ * 2. 각 작업을 담당하는 사람은 1명이다. 즉, 1 : 1 매칭
+ * 3. 각 직원이 할 수 있는 일의 목록이 주어진다.
+ * 
+ * 직원(집단 A)과 작업(집단 B)을 최대한 매칭시키는 베이직한 이분 매칭 문제.
+ * 
+ * 메모리 	시간
+ * 78212	964
+ */
+
+public class BaekOJ11375_배문규 {
+	static BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+	static StringBuilder sb = new StringBuilder();
+	static StringTokenizer st = null;
+	
+	static final int MAX_SIZE = 1001;
+	static int N, M, worker[][], b[];
+	static boolean check[];
+	
+	public static void main(String[] args) throws NumberFormatException, IOException {
+		st = new StringTokenizer(br.readLine());
+		N = Integer.parseInt(st.nextToken());
+		M = Integer.parseInt(st.nextToken());
+		
+		worker = new int[N+1][];
+		for(int i = 1; i <= N; i++) {
+			st = new StringTokenizer(br.readLine());
+			int cnt = Integer.parseInt(st.nextToken());
+			
+			worker[i] = new int[cnt];
+			for(int j = 0; j < cnt; j++) worker[i][j] = Integer.parseInt(st.nextToken());
+		}
+		
+		System.out.println(bMatch());
+	}
+	
+	public static int bMatch() {
+		b = new int[MAX_SIZE]; // b배열의 인덱스 : 작업 인덱스, b배열의 값 : 직원 인덱스 
+		check = new boolean[MAX_SIZE]; // 이미 확인한 직원인지 체크 배열
+		int result = 0; // 매칭된 작업 수
+
+		for(int i = 1; i <= N; i++) {
+			Arrays.fill(check, false); // 매번 매칭을 시도할 때마다 이미 매칭된 사람도 
+						  // 다른 작업으로 매칭이 바뀔 수 있으므로 방문 체크를 초기화 해야함 
+			if(dfs(i)) result++; // i번 째 직원이 일과 매칭이 되면 카운트
+		}
+		
+		return result;
+	}
+	
+	public static boolean dfs(int workerIdx) {
+		if(check[workerIdx]) return false;  // 이미 확인한 사람은 다시 확인할 필요 없음
+		check[workerIdx] = true;
+		
+		// 해당 직원이 수행할 수 있는 작업들 
+		for(int job : worker[workerIdx]) {
+			
+			// 매칭이 가능한 경우는 2가지가 있다.
+			// 1. 아직 해당 작업이 아무런 직원과 매칭이 되어 있지 않았을 때 
+			// 2. 이미 해당 작업에 매칭된 직원이 다른 작업도 매칭할 수 있을 때
+			if(b[job] == 0 || dfs(b[job])) {
+				b[job] = workerIdx; // 직원 <--> 작업 매칭하고 true 리턴
+				return true;
+			}
+		}
+		
+		return false;
+	}
+}
+```
 
 ---
 
