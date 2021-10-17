@@ -7,26 +7,27 @@
 크게 생성, 구조, 행위 3가지 패턴으로 디자인 패턴을 구분지을 수 있다.
 
 **1. 생성 패턴**
-   - Builder
+   - [Builder](#Builder-Pattern)
    - Prototype
    - [Factory Method](#factory-method)
    - [Abstract Factory](#abstract-factory)
    - [Singleton](#singleton)
-   
+
 **2. 구조 패턴**
    - Bridge
    - [Decorator](#decorator)
-   - Facade
+   - [Facade](#facade)
    - Flyweight
    - Proxy
    - Composite
    - [Adapter](#adapter)
-   
+
 **3. 행위 패턴**
+
    - Interpreter
    - Template Method
    - Chain of Responsibillity
-   - Command
+   - [Command](#command)
    - Iterator
    - Mediator
    - Memento
@@ -34,8 +35,236 @@
    - State
    - Strategy
    - Visitor
-   
+
+<hr>
+
 # 1. 생성패턴 
+
+<br>
+
+# Builder Pattern
+
+복잡한 객체에 대해 `생성(contruction)과 표현(representation)을 분리`함으로써 **똑같은 생성 과정으로 서로 다른 객체 표현**을 가능하게 하는 생성 디자인 패턴
+
+<br>
+
+## Builder 패턴을 사용해야하는 이유
+
+1. `Immutability` - 객체의 불변성을 유지할 수 있음
+2. `Named Parameter with Chaining` - 체이닝을 통한 명명된 매개변수 사용으로 가독성 증진
+3. `Design Flexibility` - 필수적인 변수와 선택적인 변수를 각각 생성 가능
+4. `Easy Maintenance` - 새로운 멤버가 추가되더라도 기존의 객체 생성 코드를 수정할 필요 없음
+5. `Avoid RuntimeException` - 객체 생성 과정에서 유효성 검사를 통해 논리적인 에러를 막을 수 있음
+
+> 💡 불변적인 객체로 구현해야하는 이유  
+> - 불변성(`Immutability`)이란? 객체가 초기에 한번 생성된 이후에는 절대 상태를 바꾸지 않는 것을 말한다. 객체 생성시에 모든 정보가 주어지고 객체의 생애 주기 동안에는 상태가 바뀌지 않는 것이 특징이다.
+> - 사용이 쉽다
+> - Thread Safe 하다. 동기화할 필요가 없다.
+> - 자유롭게 공유할 수 있다.
+
+## Builder 패턴의 한계
+
+코드를 2배정도 많이 사용하게 된다. 따라서 설정해야 할 매개변수가 적을 경우에는 일반 생성자를 통한 생성이 더욱 편할 수도 있다.
+
+<br>
+
+## 구현
+
+### Builder 패턴 적용 전
+
+일반적으로는 생성자(Constructor)를 통해 객체를 생성할 것이다. 생성자를 사용할 경우 멤버를 선택적으로 생성하기 어렵다.
+
+#### 1. 생성자를 사용한 생성 - 자바빈즈 패턴(JavaBeans Pattern)
+
+매개변수가 없는 기본 생성자를 통해 객체를 생성한 뒤, **Setter 메서드**를 통해 멤버를 설정하는 방식이다.
+
+[클래스 정의]
+
+```java
+public User() {
+
+}
+
+public User(String firstName, String lastName, int age, String phone, String address) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.age = age;
+    this.phone = phone;
+    this.address = address;
+}
+```
+
+[객체 생성]
+
+```java
+User user1 = new User("ssafy", "Kim", 6, "02-666-6666", "서울시 강남구 테헤란로 212 멀티캠퍼스");
+User user2 = new User("ssafy", "Lee", 5, null, null);
+
+User user3 = new User();
+user3.setFirstName("ssafy");
+user3.setLastName("Choi");
+```
+
+#### 2. 생성자를 사용한 생성 - 점층적 생성자 패턴(Telescoping Constructor Pattern)
+
+필수 매개변수만을 가진 생성자를 만들고 선택 매개변수를 하나씩 추가한 생성자를 만든다. 수많은 **생성자 오버로딩**을 통해 원하는 형태의 객체를 생성하도록 하는 방식이다.
+
+[객체 생성]
+
+```java
+public User (String firstName, String lastName, int age) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.age = age;
+    this.phone = null;
+    this.address = null;
+}
+
+public User (String firstName, String lastName, int phone) {
+    this.firstName = firstName;
+    this.lastName = lastName;
+    this.age = null;
+    this.phone = phone;
+    this.address = null;
+}
+```
+
+> 위 예제와 같이 생성자를 통한 객체 생성 시 필수 매개변수와 선택 매개변수를 구분하여 구현하기가 어렵다. 특히 매개변수가 많아진다면 일일히 setter를 부르는 일도, 매개변수 자리를 세주는 것도 일이다. 생성자를 경우의 수 별로 구현하는 것은 더욱 끔찍할 것이다.
+
+### Builder 패턴 적용 후
+
+[클래스 정의]
+
+```java
+// 클래스를 Final로 설정하여 확장이 불가능하며 불변성이 유지됨
+public final class User 
+{
+    // 불변성을 유지하기 위해 private final로 설정
+    private final String firstName;     // 필수 변수
+    private final String lastName;      // 필수 변수
+    private final int age;              // 선택 변수
+    private final String phone;         // 선택 변수
+    private final String address;       // 선택 변수
+
+    private User(UserBuilder builder) {
+        this.firstName = builder.firstName;
+        this.lastName = builder.lastName;
+        this.age = builder.age;
+        this.phone = builder.phone;
+        this.address = builder.address;
+    }
+ 
+    // Setter를 구현하지 않음으로써 불변성 유지
+    public String getFirstName() {
+        return firstName;
+    }
+    public String getLastName() {
+        return lastName;
+    }
+    public int getAge() {
+        return age;
+    }
+    public String getPhone() {
+        return phone;
+    }
+    public String getAddress() {
+        return address;
+    }
+ 
+    @Override
+    public String toString() {
+        return "User: "+this.firstName+", "+this.lastName+", "+this.age+", "+this.phone+", "+this.address;
+    }
+ 
+    // 객체 내부에 Builder 정의(중첩 클래스)
+    public static class UserBuilder 
+    {
+        // 필수적인 변수만 final로 설정
+        private final String firstName;     // 필수 변수
+        private final String lastName;      // 필수 변수
+        private int age;                    // 선택 변수
+        private String phone;               // 선택 변수
+        private String address;             // 선택 변수
+
+        // Builder 생성자 매개변수는 필수 변수만을 포함
+        public UserBuilder(String firstName, String lastName) {
+            this.firstName = firstName;
+            this.lastName = lastName;
+        }
+        // 선택적인 변수는 추가적인 메서드를 구현하여 생성
+        public UserBuilder age(int age) {
+            this.age = age;
+            return this;
+        }
+        public UserBuilder phone(String phone) {
+            this.phone = phone;
+            return this;
+        }
+        public UserBuilder address(String address) {
+            this.address = address;
+            return this;
+        }
+        // Builder로 생성된 객체 반환
+        public User build() {
+            User user =  new User(this);
+            if (!validateUserName(user)) throw new NoNameException();
+            if (!validateUserAge(user)) throw new InvalidAgeException();
+            return user;
+        }
+        private boolean validateUserName(User user) {
+            if (user.firstName==null || user.lastName==null) {
+                if (user.age!=null || user.phone!=null || user.address!=null) return false;
+            }
+            return true;
+        }
+        private boolean validateUserAge(User user) {
+            if (user.age<0) return false;
+            return true;
+        }
+    }
+}
+```
+
+[객체 생성]
+
+```java
+User user1 = new User.UserBuilder("ssafy", "Kim")
+                     .age(6)
+                     .phone("02-666-6666")
+                     .address("서울시 강남구 테헤란로 212 멀티캠퍼스")
+                     .build();
+
+User user2 = new User.UserBuilder("ssafy", "Lee")
+                     .age(5)
+                     // no phone
+                     // no address
+                     .build();
+
+User user3 = new User.UserBuilder("ssafy", "Choi")
+                     // no age
+                     // no phone
+                     // no address
+                     .build();
+```
+
+> 빌더 패턴을 이용해 위와 같이 하나의 생성자만으로 여러 상태의 객체를 생성할 수 있게되었다.
+
+- 멤버를 `final`로 설정하여 불변성을 유지할 수 있다.
+- 선택적인 변수의 경우 `null`로 설정할 필요가 없다. 또한 생성자 오버로딩을 하지 않아 선택적인 변수를 가진 객체도 동일한 방법으로 생성할 수 있다.
+- 각 변수의 이름에 해당하는 메서드를 chaining 방식으로 접근하여 초기화할 수 있다. 따라서 **생성자의 매개변수 순서를 기억할 필요가 없고, 생성 과정에서의 가독성이 훨씬 좋아진다**.
+- 만약 **새로운 멤버 변수가 추가되더라도 기존 객체 생성 코드를 수정하지 않아도 된다**. 새롭게 추가된 멤버 변수도 선택적인 매개변수와 동일하게 처리하기 때문이다.
+- 추가적으로 **빌더 클래스 내부에 유효성 검사 메서드를 추가**한다면 멤버 생성 과정에서의 논리적인 에러를 사전에 차단할 수 있다.
+
+<hr>
+
+#### References
+
+[howtodoinjava Builder Pattern](https://howtodoinjava.com/design-patterns/creational/builder-pattern-in-java/)  
+[dzone Immutability and Builder Pattern](https://dzone.com/articles/immutability-with-builder-design-pattern)  
+[StackExchange Why do we need a builder class](https://softwareengineering.stackexchange.com/questions/380397/why-do-we-need-a-builder-class-when-implementing-a-builder-pattern)  
+
+<br>
+
 ## Factory Method
 #### 팩토리 메소드 패턴(Factory Method Pattern)이란 상위 클래스에 알려지지 않은 구현 클래스를 생성하는 패턴이다.
 #### 또한 하위 클래스가 어떤 객체를 생성할지 결정하도록 하는 패턴이기도 하다. 그리고 상위 클래스 코드에 구체적인 클래스 이름을 감추기 위한 방법으로도 사용한다.
@@ -1128,6 +1357,224 @@ br.readLine();
 
 ---
 
+# Facade
+
+### Facade Pattern이란?
+
+<p align="center"><img width="70%" alt="99B6F54A5C68D4A91D" src="https://user-images.githubusercontent.com/51703260/136665199-6829f771-bea6-458e-9e8f-b75d4d1098b3.png"></p>
+
+퍼사드란, 프랑스어 Façade 에서 유래된 단어로 **"건물의 겉면"** 을 의미한다.
+   
+퍼사드 패턴의 목적은 복잡한 **서브시스템(내부 구조)** 을 거대한 **클래스(외벽)** 로 감싸서 편리한 인터페이스를 제공해주는 것이다. <br> 이 퍼사드 패턴은 제 3의 API(Third Party API)같은 외부 라이브러리를 추상화 하는데도 사용되기도 한다. 
+
+클라이언트는 퍼사드에서 고수준 인터페이스를 정의하기 때문에 서브시스템을 더 쉽게 사용할 수 있고 오직 퍼사드만 알아도 되므로 서브시스템에 의존하지 않을 수 있게 된다.
+
+### Facade Pattern 예시
+
+<p align="center"><img width="70%" alt="99B6F54A5C68D4A91D" src="https://user-images.githubusercontent.com/51703260/136668628-26a61237-872a-49a7-b053-cdfaad07cb46.jpg"></p>
+
+전자레인지를 예시로 퍼사드 패턴을 설명해보려고 한다.
+   
+전자레인지를 작동시키는 방법은 전원을 연결시키고 타이머를 설정하고 버튼을 눌러 작동 시킬 수 있다.
+   
+우리가 전자레인지를 사용하기 위해서는 전자레인지가 동작하는 원리라던가, 복잡한 내부구조에 대해서는 굳이 알 필요가 없다.
+   
+이런것이 일종의 전자레인지 퍼사드라고 이해해도 좋을 것 같다.
+   
+#### 전자레인지의 내부 구성
+- `스위치` : 전원을 키고 끔
+- `쿨러` : 전자레인지를 식혀줌
+- `턴테이블` :  회전시킴
+- `마그네트론` : 마이크로파를 발생시킴
+- `타이머` : 일정 시간동안 전자레인지를 작동시킴
+
+> MicrowaveSwitch.java
+```java
+public interfaces MicrowaveSwitch{
+     public void on();
+     public void off();
+}
+```
+
+> MicrowaveCooler.java
+```java
+public class MicrowaveCooler implements MicrowaveSwitch {
+    @Override
+    public void on() {
+        System.out.println("Cooler Start");
+    }
+    
+    @Override
+    public void off() {
+        System.out.println("Cooler Stop");
+    }
+}
+```
+
+> MicrowaveTurntable.java
+```java
+public class MicrowaveTurntable implements MicrowaveSwitch{
+    @Override
+    public void on() {
+        System.out.println("Turntable Start");
+    }
+    
+    @Override
+    public void off() {
+        System.out.println("Turntable Stop");
+    }
+}
+```
+
+> MicrowaveMagnetron.java
+```java
+public class MicrowaveMagnetron implements MicrowaveSwitch {
+    @Override
+    public void on() {
+        System.out.println("Magnetron Start");
+    }
+ 
+    @Override
+    public void off() {
+        System.out.println("Magnetron Stop");
+    }
+}
+```
+
+> MicrowaveTimer.java
+```java
+import java.util.Timer;
+import java.util.TimerTask;
+
+public class MicrowaveTimer implements MicrowaveSwitch{
+    public static long TIME_INTERVAL = 1000;
+    private final int EXPIRED_TIME;
+    private Timer timer;
+    private TimerTask task;
+    MicrowaveFacade microwave;
+    int count = 0;
+    
+    public MicrowaveTimer(int sec, MicrowaveFacade microwave) {
+        super();
+        this.EXPIRED_TIME = sec;
+        this.count = EXPIRED_TIME;
+        this.microwave = microwave;
+        timer = new Timer();
+        task = new TimerTask() {
+            @Override
+            public void run() {
+                if(count > 0) System.out.println("Timer : " + (count--) + " sec");
+                else {
+                    System.out.println("Timer End");
+                    timer.cancel();
+                    microwave.off();
+                }
+            }
+        };
+    }
+ 
+    @Override
+    public void on() {
+        System.out.println("Timer Start" );
+        timer.schedule(task, 0, TIME_INTERVAL);
+    }
+    
+    @Override
+    public void off() {
+        timer.cancel();
+    }
+}
+```
+
+만약 우리가 전자레인지를 퍼사드 패턴을 쓰지 않고 작동시킨다면, 우리는 직접 모든 내부 장치들의 스위치를 키고 꺼야한다.
+
+먼저 쿨러를 키고, 마그네트론을 키고 턴테이블을 돌린 다음에 타이머를 켜서 원하는 시간만큼 작동시킨다. 그리고 작동이 끝나거나 정지시키려면 역순으로 하나씩 모두 직접 스위치를 내려 꺼야한다.
+
+하지만 아래와 같이 우리가 일상에서 사용하는 전자레인지는 아래와 같이 퍼사드 패턴을 적용시켜서 내부 구조를 알지 못해도 그냥 버튼을 하나만 눌러도 전자레인지의 온전한 기능을 모두 누릴 수 있게된다.
+
+그리고 각각의 부품을 다른 부품으로 교체(700와트 -> 1000와트)하여도 사용자들은 바뀐 부품에 따라 다르게 전자레인지를 작동시키는 것이 아닌 예전과 동일하게 전자레인지를 사용할 수 있기 때문에 퍼사드 패턴을 적용하면 클라이언트가 서브시스템에 의존하지 않을 수 있게 된다는 것이다.
+
+> MicrowaveFacade.java
+```java
+public class MicrowaveFacade {
+    MicrowaveCooler cooler;
+    MicrowaveMagnetron magnetron;
+    MicrowaveTimer timer;
+    MicrowaveTurntable turntable;
+    MicrowaveSwitch[] switches;
+    boolean isActive = false;
+    
+    public MicrowaveFacade(MicrowaveCooler cooler, MicrowaveMagnetron magnetron, MicrowaveTimer timer, MicrowaveTurntable turntable) {
+        super();
+        this.cooler = cooler;
+        this.turntable = turntable;
+        this.magnetron = magnetron;
+        this.timer = timer;
+        switches = new MicrowaveSwitch[]{cooler, turntable,  magnetron, timer};
+    }
+ 
+    public MicrowaveFacade(int time) {
+        super();
+        cooler = new MicrowaveCooler();
+        turntable = new MicrowaveTurntable();
+        magnetron = new MicrowaveMagnetron();
+        timer = new MicrowaveTimer(time, this);
+        switches = new MicrowaveSwitch[]{cooler, turntable,  magnetron, timer};
+    }
+    
+    public void on() {
+        System.out.println("Microwave On");
+        for(int i=0; i<switches.length; ++i) {
+            switches[i].on();
+        }
+        isActive = true;
+    }
+    
+    public void off() {
+        for(int i=switches.length-1; i>=0; i--) {
+            switches[i].off();
+        }
+        System.out.println("Microwave Off");
+        isActive = false;
+    }
+}
+```
+
+> MicrowaveTest.java
+```java
+public class MicrowaveTest {
+    public static void main(String[] args) {
+        MicrowaveFacade microwave = new MicrowaveFacade(10);
+        microwave.on();
+    }
+}
+```
+
+위 코드를 테스트 해보면, 그냥 전자레인지 타이머를 10초 설정을 하고 그냥 on 하기만 하면 아래와 같은 결과를 확인할 수 있다.
+
+![화면 캡처 2021-10-10 021733](https://user-images.githubusercontent.com/51703260/136668170-ab351727-bba3-480b-b190-2296e4fe9d0a.png)
+
+---
+
+![997F75335C334C3E1E](https://user-images.githubusercontent.com/51703260/136668218-3ce19bb0-4e7a-47d4-be2c-ee8b2f4d61dc.jpg)
+
+위 클래스 다이어그램과 같이 전자레인지를 사용하는 MicrowaveTest(User) 클래스에서는 전자레인지의 내부 부품들이 MicrowaveFacade 클래스에 감싸져 있지만 제공되는 인터페이스(on, off 버튼 등..)를 통해 간편하게 사용할 수 있다.
+
+### 사용용도
+
+- 퍼사드 패턴은 퍼사드 클래스가 서브시스템 클래스들을 캡슐화를 해주는 기능을 제공하는 것 보다, 서브시스템 기능들을 편리하게 사용할 수 있는 인터페이스를 제공하는 것이 주된 목적이다.
+- 클라이언트와 구현 클래스 또는 서브시스템과 다른 서브시스템간에 의존관계가 많을 경우 이를 감소시켜 각 서브시스템들의 독립성과 이식성을 높이는것을 목적으로 사용한다.
+
+### 장단점
+
+#### 장점
+- 클라이언트가 다뤄야 할 객체의 수를 줄여준다.
+- 클라이언트와 서브시스템 간의 결합도가 높아 복잡할 때 퍼사드 패턴을 활용하면 간편해진다.
+
+#### 단점
+- 클라이언트에게 내부 서브시스템까지 숨길 수는 없다.
+- 클라이언트가 서브시스템 내부의 클래스를 직접 사용하는 것을 막을 수 없다.
+---
 ## Adapter
 #### 어댑터 패턴(Decorator Pattern)이란 한 클래스의 인터페이스를 클라이언트에서 사용하고자 할 때, 다른 인터페이스로 변환시켜 사용하는 패턴이다. 
 #### 어댑터를 이용하면 인터페이스 호환성 문제 때문에 같이 쓸 수 없는 클래스들을 연결해서 쓸 수 있다.
@@ -1270,3 +1717,310 @@ public class Main{
 이렇게 어댑터 패턴을 통해 mp3Player 에서도 video 포맷의 파일을 재생시킬 수 있다. 물론 영상은 못보고 소리만 나오겠지만..
 
 ---
+
+# 3.행위 패턴
+
+# Command
+
+커맨드(Command) 패턴은 특정 객체에 대한 특정 **작업 요청을 객체로 캡슐화**함으로써 주어진 여러 기능을 사용할 수 있는 재사용성이 높은 클래스를 설계하는 패턴입니다. 
+
+이벤트가 발생했을 때 실행될 기능이 다양하면서도 변경이 필요한 경우에 이벤트를 발생 시키는 클래스를 변경하지 않고 재사용하고자 할 때 유용합니다.
+
+Client가 보낸 요청을 객체로 만들어서 객체를 큐로 관리하고 저장,로깅,취소할 수도 있습니다.
+
+
+
+<p align="center"><img src="img/command_example1.png" width="600"></p>
+
+홈 오토메이션 리모컨을 만든다고 생각해봅시다.
+
+1번 버튼에 Light가 연결되어 있으면 ligth.on(), GarageDoor가 연결되어 있으면 garageDoor.up()... 
+
+각 버튼에 기능을 직접 연결한다면 기능들이 추가될 때마다 리모컨의 코드를 고쳐야합니다.
+
+하지만, 커맨드 패턴을 적용한다면 버튼마다 커맨드 객체를 저장해 두어 사용자가 버튼을 눌렀을 때 커맨드 객체를 통해서 작업을 처리하도록 만들 수 있습니다.
+
+그러므로 리모컨에서는 자세한 내용을 전혀 몰라도 됩니다. 
+
+리모컨은 어떤 객체에 어떤 일을 시켜야 할지 잘 알고 있는 커맨드 객체만 있으면 됩니다.
+
+
+
+## 커맨드 패턴의 구조와 구성요소
+
+<p align="center"><img src="img/command_class_diagram.PNG" width="600"></p>
+
+- Clinet
+
+  - ConcreteCommand를 생성하고 Receiver를 설정합니다.
+  - Invoker 객체의 setCommand() 메소드를 호출하여 커맨드 객체를 넘겨줍니다.
+
+- Invoker
+
+  - setCommand() 메소드를 통해 커맨드 객체를 저장하고 있습니다.
+  - 저장된 커맨드 객체의 execute() 메소드를 호출함으로써 커맨드 객체에게 특정 작업을 수행해 달라는 요구를 하게 됩니다.
+
+- Command
+
+  - 모든 커맨드 객체에서 구현해야 하는 인터페이스입니다.
+  - 행동과 receiver에 대한 정보가 들어있습니다.
+  - 모든 명령은 execute() 메소드 호출을 통해 수행되며, 이 메소드에서는 receiver에 특정 작업을 처리하라는 지시를 전달합니다.
+
+- Receiver
+
+  - 기능을 수행합니다.
+  - 요구 사항을 수행하기 위해 어떤 일을 처리해야 하는지 알고있는 객체입니다.
+
+- ConcreteCommand
+
+  - 특정 행동과 receiver 사이를 연결해 줍니다.
+  - Invoker에서 execute() 호출을 통해 요청을 하면 ConcreteCommand 객체에서 receiver에 있는 메소드를 호출함으로써 그 작업을 처리합니다.
+  - execute() 메소드 에서는 receiver에 있는 메소드를 호출하여 요청된 작업을 수행합니다.
+
+  
+
+## 커맨드 패턴의 동작 순서
+
+1. Client에서 커맨드 객체를 생성
+
+2. Invoker 객체의 setCommand() 메소드를 호출하여 커맨드 객체를 저장
+
+3. Clinet에서 Invoker를 통해  execute() 요청을 전송
+
+4. Invoker에서 커맨드 객체의 execute() 실행
+
+5. 커맨드 객체의 Receiver가 수행.
+
+   
+
+- Light
+
+  ```java
+  //Receiver 역할
+  public class Light { 
+  	
+  	private String location;
+  	
+      public Light(String location) {
+      	this.location = location;
+      }
+      
+      public void on(){        
+          System.out.println(location + " Light is on");
+      }
+  
+      public void off(){        
+          System.out.println(location + " Light is off");
+      }               
+  
+  }
+  ```
+
+  
+
+- Command
+
+  ```java
+  public interface Command {
+  	void execute();
+  }
+  ```
+
+
+
+- LightOnCommand
+
+  ```java
+  public class LightOnCommand implements Command {
+  	
+  	Light light;
+  	
+  	public LightOnCommand(Light light) {
+  		super();
+  		this.light = light;
+  	}
+  
+  	@Override
+  	public void execute() {
+  		light.on();
+  	}
+  
+  }
+  
+  ```
+
+  
+
+- LightOffCommand
+
+  ```java
+  public class LightOffCommand implements Command {
+  	
+  	Light light;
+  	
+  	public LightOffCommand(Light light) {
+  		super();
+  		this.light = light;
+  	}
+  
+  	@Override
+  	public void execute() {
+  		light.off();
+  	}
+  
+  }
+  ```
+
+  
+
+- StereoOnWithCDCommand
+
+  ```java
+  public class StereoOnWithCDCOmmand implements Command {
+  	
+  	Stereo stereo;
+  	
+      public StereoOnWithCDCOmmand(Stereo stereo){
+          this.stereo = stereo;
+      }
+      
+      // execute에서 여러 개의 동작을 수행하는 로직을 작성할 수 있습니다.
+      public void execute() {
+          stereo.On();
+          stereo.SetCD();
+          stereo.SetVolume(11);
+      }
+  }
+  ```
+
+  
+
+- RemoteController
+
+  ```java
+  // Invoker 역할
+  public class RemoteController {
+  	
+  	static final int SIZE = 7;
+  	Command[] onCommands;
+      Command[] offCommands;
+  
+      public RemoteController() {
+  
+          onCommands = new Command[SIZE];
+          offCommands = new Command[SIZE];
+          
+          // null 처리를 대신할 커맨드
+          Command noCommand = new NoCommand();
+  
+          for (int i = 0; i < SIZE; i++) {
+              onCommands[i] = noCommand;
+              offCommands[i] = noCommand;
+          }
+      }
+  
+      public void setCommand(int slot, Command onCommand, Command offCommand) {
+          onCommands[slot] = onCommand;
+          offCommands[slot] = offCommand;
+      }
+  
+      public void onButtonWasPushed(int slot) {
+          onCommands[slot].Execute();
+      }
+  
+      public void offButtonWasPushed(int slot) {
+          offCommands[slot].Execute();
+      }
+      
+      @Override
+      public String toString(){
+          StringBuffer sb = new StringBuffer();
+          sb.append("\n------ Remote Control -----\n");
+  
+          for (int i = 0; i < onCommands.length; i++) {
+              sb.append("[slot " + i + "] " + 
+                  onCommands[i].getClass().getName() + "    " + 
+                  offCommands[i].getClass().getName() + "\n");
+          }
+         return sb.toString();
+      }
+  }
+  ```
+
+
+
+- Client
+
+  ```java
+  //Client 역할
+  public class RemoteControlTest {
+  
+  	public static void main(String[] args) {
+  		RemoteController remoteController = new RemoteController();
+  		
+  		Light livingRoomlight = new Light("Living Room");
+  		Light kitchenlight = new Light("Kitchen");
+  		
+  		LightOnCommand livingRoomlightOn =
+  				new LightOnCommand(livingRoomlight);
+  		LightOffCommand livingRoomlightOff =
+  				new LightOffCommand(livingRoomlight);
+  		LightOnCommand KitchenlightOn =
+  				new LightOnCommand(kitchenlight);
+  		LightOffCommand KitchenlightOff =
+  				new LightOffCommand(kitchenlight);
+  		
+  		remoteController.setCommand(1, livingRoomlightOn, livingRoomlightOff);
+  		remoteController.setCommand(2, KitchenlightOn, KitchenlightOff);
+  		
+  		remoteController.onButtonWasPushed(1);
+  		remoteController.offButtonWasPushed(1);
+  		
+          System.out.println(remoteController);
+          
+  		remoteController.onButtonWasPushed(2);
+  		remoteController.offButtonWasPushed(2);
+  	}
+  
+  }
+  ```
+
+  <p align="center"><img src="img/command_example2.PNG" width="600"></p>
+
+
+
+## 커맨드 패턴의 장단점
+
+- 장점
+  - 작업을 요청하는 객체와 수행하는 객체를 분리하여 의존성을 줄이고 단일 책임 원칙(SRP)을 만족합니다
+  - 코드의 수정 없이 작업 수행 객체나 추가 구현이 가능하여 개방-폐쇄 원칙(OCP)을 만족합니다.
+
+- 단점
+  - 커맨드가 추가되면 클래스를 계속 생성해야 합니다.
+
+
+
+## 커맨드 패턴 활용
+
+- 작업 큐
+
+  - 커맨드 객체를 생성하고 큐에 추가합니다. ex) 네트워크 연결, 다운로드 ...
+  - 스레드에서 큐로부터 커맨드를 하나씩 제거하면서 커맨드의 execute() 메소드를 호출합니다.
+
+  
+
+- 요청을 로그에 기록
+
+  - 커맨드에 save()와 load() 메소드를 추가합니다.
+
+  - 각 커맨드가 실행될 때 마다 디스크에 그 내역을 저장합니다.
+
+  - 시스템이 다운되었다가 복구할 때 그 저장 기록으로 커맨드 객체를 다시 실행할 수 있습니다.
+
+    
+
+### Reference
+
+http://latedreamer.blogspot.com/2017/02/command-pattern.html
+
+https://brownbears.tistory.com/561
